@@ -101,9 +101,11 @@ while (my $inline = <IN>)
 #        $inline =~ s/\-\r\n//;
 #        $inline =~ s/\-\r//;
 
+        $inline =~ s/[\-]+/-/g;
         $inline =~ s/ - / /g;
         $inline =~ s/[^\w\d\-\/\%]/ /g;
         $inline =~ s/cу/су/g;
+        $inline =~ s/ и т.д./ и так далее /g;
         $inline =~ s/ґ//g;
         $inline =~ s/(\w) \-(\w)/$1\-$2/g;
         $inline =~ s/(\w)\- (\w)/$1\-$2/g;

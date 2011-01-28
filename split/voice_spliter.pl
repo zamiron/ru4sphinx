@@ -17,9 +17,9 @@ my $infile;
 
 my $noise_dur_add_def=0.60;
 my $noise_def=0.04;		# Начальное соотношение сигнал/шум - в % (0.04)
-my $noise_max=0.30;		# Максимальное соотношение сигнал/шум - в % (0.2)
+my $noise_max=0.20;		# Максимальное соотношение сигнал/шум - в % (0.2)
 my $noise_dur=1;		# Максимальная длительность шума - 1 сек
-my $max_duration_def=25;	# максимальная длительность фрагмента, которую хотелось бы получить - сек (25 сек)
+my $max_duration_def=15;	# максимальная длительность фрагмента, которую хотелось бы получить - сек (25 сек)
 my $min_duration=3;		# (noise_dur_max) - минимальная длина получаемого фрагмента (3 сек)
 my $max_overload=3;		# проверить переподписку на несколько слов (помогает в некоторых случаях)
 
@@ -101,7 +101,7 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 #		$sil_param="silence -l 0.0 1.0 1.0 $noise\% pad $siltime $siltime";
 		$voice_sil=$noise_dur-$noise_dur_add;
 		if ($voice_sil<0.1) { $voice_sil=0.1; }
-		$sil_param="silence -l 0.0 ".$voice_sil." ".($noise_dur+$noise_dur_add)." $noise\%";
+		$sil_param="silence -l 0.0 ".$voice_sil." ".($noise_dur+$noise_dur_add+$min_duration+1)." $noise\%";
 #		if ($max_duration == $max_duration_def and stat("$newfilename.wav")) {
 #			print "[skip...] ";
 #			} else {
@@ -112,8 +112,8 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 		}
 	$newfile_duration=`soxi -D $newfile`; chomp($newfile_duration);
 #	if ($newfile_duration<2)  { $noise=$noise-0.001; }
-	if ($newfile_duration<10)  { $word_in_sec=0.7; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
-	if ($newfile_duration<4)  { $word_in_sec=0.5; }
+	if ($newfile_duration<10) { $word_in_sec=0.9; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
+	if ($newfile_duration<6)  { $word_in_sec=0.3; }
 	if ($newfile_duration>$max_duration or $newfile_duration<$min_duration) { $noise=$noise+0.007; }
 	if ($newfile_duration<$min_duration) { $noise_dur_add=$noise_dur_add+0.02; }
 	print "duration: $newfile_duration sec\n";
@@ -151,10 +151,10 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 #	$f2=ceil($arrtext_len*$trim/$infile_duration)+10;
 #	$f2=$f1;
 
-	$f4=$f1+ceil($word_in_sec*$newfile_duration)*0.60;
+	$f4=$f1+floor($word_in_sec*$newfile_duration*0.60);
 	if ($f4>$arrtext_len) { $f4=$arrtext_len; }
 
-	$f2=$f1+ceil($word_in_sec*$newfile_duration)*1.40;
+	$f2=$f1+floor($word_in_sec*$newfile_duration*1.40);
 	if ($f2>$arrtext_len) { $f2=$arrtext_len; }
 #	$f2=$f4;
 
@@ -173,9 +173,12 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 		utf8::decode($textsphinx);
 		@arrsphinx=split(" ",$textsphinx);
 
-		$f2=$f1+ceil($word_in_sec*$newfile_duration);
+		$f2=$f1+floor($word_in_sec*$newfile_duration);
+#		if ($newfile_duration<5) { $f2=$f1-1; }
+
+#		print "f2=$f2\n";
 #		$f2=$f1+$#arrsphinx-1;
-		&gramm_align();
+		&gramm_align(2);
 		$testtext='';
 		for (my $ni = $f1; $ni <= $f2; $ni++)
 		{
@@ -383,7 +386,7 @@ sub gramm_align {
 #print "gramm_align:'$textsphinx'\n'@arrtext_full'\n";
 my $newfound=0;
 my $ni;
-#my $flag1=@_[0];
+my $param1=@_[0];
 #my $fsphinx;
  	@arrsphinx=split(" ",$textsphinx);
 
@@ -403,8 +406,8 @@ my $ni;
 
 		if (@arrtext_file[$ni]) { next; }
 #		print $ni;
-#		if (@arrtext_file[$ni-1] and @arrtext_full[$ni] eq @arrsphinx[$ni-$f1+$offset]) {
-		if (@arrsphinx[$ni-$f1+$offset]) {
+		if (@arrtext_file[$ni-1] and @arrtext_full[$ni] eq @arrsphinx[$ni-$f1+$offset]) {
+#		if (@arrsphinx[$ni-$f1+$offset]) {
 			@arrtext_file[$ni] = $fnum;
 			$newfound++;
 #			print " $ni";
@@ -440,9 +443,10 @@ my $ni;
 
 ###################### обнаружение пропущенных фраз #################
 #			if ($ni>=$fsave+3 and $ni <= $fsave+50) {
-			if ($ni>=$fsave+7 and $ni <= $fsave+50) {
+			if ($ni>=$fsave+3 and $ni <= $fsave+10) {
 		if (@arrtext_full[$ni] eq @arrsphinx[$ni2] and @arrtext_full[$ni+1] eq @arrsphinx[$ni2+1] and @arrtext_full[$ni+2] eq @arrsphinx[$ni2+2] and 
-		    @arrsphinx[$ni2] and @arrsphinx[$ni2+1] and @arrsphinx[$ni2+2]) {
+		@arrtext_full[$ni+3] eq @arrsphinx[$ni2+3] and @arrtext_full[$ni+4] eq @arrsphinx[$ni2+4] and
+		    @arrsphinx[$ni2] and @arrsphinx[$ni2+1] and @arrsphinx[$ni2+2] and @arrsphinx[$ni2+3] and @arrsphinx[$ni2+4]) {
 			LOG ("skip in '$newfilename', match: \[@arrsphinx[$ni2] @arrsphinx[$ni2+1] @arrsphinx[$ni2+2] @arrsphinx[$ni2+3]\], ".($fsave+1)."-".($ni-1)." :");
 			for ($ni3 = $fsave+1; $ni3 < $ni; $ni3++) {
 				LOG(" ".@arrtext_full[$ni3]);
@@ -481,7 +485,7 @@ my $ni;
 #		}
 #	}
 
-if (!$newfound) {
+if (!$newfound and $param1!=2) {
 	$f3++;
 	if ($fsave>=$f3) { $f3=$fsave+1; }
 	@arrtext_file[$f3] = $fnum;
@@ -502,8 +506,9 @@ sub gramm_try {
 #	system("sphinx3_decode -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -mode fsg -fsg $newfilename.fsg -hyp $newfilename.sphinx 1>/dev/null 2>/dev/null");
 #	system("sphinx3_decode -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -fsgusealtpron yes -fsgusefiller yes -mode fsg -fsg $newfilename.fsg -hyp $newfilename.sphinx".' 2>&1 |grep ERROR');
 #	system("pocketsphinx_batch -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -adchdr 44 -beam 1e-100 -fsgusealtpron yes -fsgusefiller yes -fsg $newfilename.fsg -hyp $newfilename.sphinx".' &>/dev/null');
-#	system("pocketsphinx_batch -fwdflatwbeam no -fwdtree no -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -adchdr 44 -fsgusealtpron yes -fsgusefiller yes -fsg $newfilename.fsg -hyp $newfilename.sphinx".' 2>&1 |grep ERROR');
+#	system("pocketsphinx_batch -beam 1e-120 -wbeam 1e-60 -lw 16 -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -adchdr 44 -fsgusealtpron yes -fsgusefiller yes -fsg $newfilename.fsg -hyp $newfilename.sphinx".' 2>&1 |grep ERROR');
 #	system("sphinx3_decode -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -adchdr 44 -fsgusealtpron yes -fsgusefiller yes -mode fsg -fsg $newfilename.fsg -hyp $newfilename.sphinx".' &>/dev/null');
+
 	system("sphinx3_decode -hmm $voice_model -dict $DIC -ctl test.fileids -cepdir . -cepext .wav -adcin yes -adchdr 44 -fsgusealtpron yes -fsgusefiller yes -mode fsg -fsg $newfilename.fsg -hyp $newfilename.sphinx".' 2>&1 |grep ERROR');
 
 	$textsphinx=`cat $newfilename.sphinx`;
