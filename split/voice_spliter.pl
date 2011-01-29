@@ -112,7 +112,7 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 		}
 	$newfile_duration=`soxi -D $newfile`; chomp($newfile_duration);
 #	if ($newfile_duration<2)  { $noise=$noise-0.001; }
-	if ($newfile_duration<10) { $word_in_sec=0.9; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
+	if ($newfile_duration<10) { $word_in_sec=0.8; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
 	if ($newfile_duration<6)  { $word_in_sec=0.3; }
 	if ($newfile_duration>$max_duration or $newfile_duration<$min_duration) { $noise=$noise+0.007; }
 	if ($newfile_duration<$min_duration) { $noise_dur_add=$noise_dur_add+0.02; }
@@ -154,7 +154,7 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 	$f4=$f1+floor($word_in_sec*$newfile_duration*0.60);
 	if ($f4>$arrtext_len) { $f4=$arrtext_len; }
 
-	$f2=$f1+floor($word_in_sec*$newfile_duration*1.40);
+	$f2=$f1+floor($word_in_sec*$newfile_duration*1.40)+5;
 	if ($f2>$arrtext_len) { $f2=$arrtext_len; }
 #	$f2=$f4;
 
@@ -176,9 +176,10 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 		$f2=$f1+floor($word_in_sec*$newfile_duration);
 #		if ($newfile_duration<5) { $f2=$f1-1; }
 
-#		print "f2=$f2\n";
+#		print "f2=$f2 ->";
 #		$f2=$f1+$#arrsphinx-1;
 		&gramm_align(2);
+#		print " $f2\n";
 		$testtext='';
 		for (my $ni = $f1; $ni <= $f2; $ni++)
 		{
