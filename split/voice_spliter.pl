@@ -73,7 +73,7 @@ $fnum=0;
 @arrtext_full=split(" ",$text);
 my $arrtext_len=$#arrtext_full;
 #my $word_in_sec=$arrtext_len/$infile_duration;
-my $word_in_sec=2;	# среднее колличество слов произносимое в секунду
+my $word_in_sec=1;	# среднее колличество слов произносимое в секунду
 
 while($trim<$infile_duration-$min_duration) { # возможно в конце файла несколько секунды тишины
 
@@ -151,10 +151,10 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 #	$f2=ceil($arrtext_len*$trim/$infile_duration)+10;
 #	$f2=$f1;
 
-	$f4=$f1+floor($word_in_sec*$newfile_duration*0.60);
+	$f4=$f1+floor($word_in_sec*$newfile_duration*0.40);
 	if ($f4>$arrtext_len) { $f4=$arrtext_len; }
 
-	$f2=$f1+floor($word_in_sec*$newfile_duration*1.40)+5;
+	$f2=$f1+floor($word_in_sec*$newfile_duration*1.5)+5;
 	if ($f2>$arrtext_len) { $f2=$arrtext_len; }
 #	$f2=$f4;
 
