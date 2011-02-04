@@ -15,14 +15,17 @@ my $testtext;
 my $textsphinx;
 my $infile;
 
-my $noise_dur_add_def=0.60;
-my $noise_def=0.04;		# Начальное соотношение сигнал/шум - в % (0.04)
-my $noise_max=0.20;		# Максимальное соотношение сигнал/шум - в % (0.2)
+my $noise_dur_add_def=0.6;	# 0.6
+my $noise_min_def=0.04;		# Начальное соотношение сигнал/шум - в % (0.04)
+my $noise_max_def=0.20;		# Максимальное соотношение сигнал/шум - в % (0.2)
 my $noise_dur=1;		# Максимальная длительность шума - 1 сек
-my $max_duration_def=15;	# максимальная длительность фрагмента, которую хотелось бы получить - сек (25 сек)
+my $max_duration_def=15;	# максимальная длительность фрагмента, которую хотелось бы получить - сек (15 сек)
 my $min_duration=3;		# (noise_dur_max) - минимальная длина получаемого фрагмента (3 сек)
-my $max_overload=3;		# проверить переподписку на несколько слов (помогает в некоторых случаях)
+my $max_overload=2;		# проверить переподписку на несколько слов (помогает в некоторых случаях)
 
+
+my $noise_def=$noise_min_def;
+my $noise_max=$noise_max_def;
 my $noise=$noise_def;
 my $max_duration=$max_duration_def;
 my $noise_dur_add=$noise_dur_add_def;
@@ -92,6 +95,8 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 	$newfilename=$wavdir.$infile_name."_".$dfnum;
 	$newfile=$newfilename.".wav";
 
+	$noise_max=$noise_max_def;
+	$noise_def=$noise_min_def;
 	$newfile_duration=0;
 	while($newfile_duration<$min_duration or $newfile_duration>$max_duration) {
 # and !stat("$newfilename.wav")
@@ -114,13 +119,27 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 #	if ($newfile_duration<2)  { $noise=$noise-0.001; }
 	if ($newfile_duration<10) { $word_in_sec=0.8; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
 	if ($newfile_duration<6)  { $word_in_sec=0.3; }
-	if ($newfile_duration>$max_duration or $newfile_duration<$min_duration) { $noise=$noise+0.007; }
+
+
+	if ($newfile_duration>50) {
+		$noise=$noise+0.05;
+		}
+
+	if ($newfile_duration>100) {				# зашумлённая запись
+		$noise_max=$noise_max+0.15;
+		$noise_def=$noise;
+		$noise=$noise+0.1;
+		$max_duration=$max_duration+0.5;
+		}
+	if ($newfile_duration>$max_duration or $newfile_duration<$min_duration) { $noise=$noise+0.008; }
 	if ($newfile_duration<$min_duration) { $noise_dur_add=$noise_dur_add+0.02; }
 	print "duration: $newfile_duration sec\n";
 
 #	if ($noise>$noise_max) { $noise_dur=$noise_dur+0.03; $noise=$noise_def; $max_duration=$max_duration+5; $noise_dur_add=$noise_dur_add+0.03; }
 	if ($noise>$noise_max) {
 		$noise=$noise_def;
+		$noise_def=$noise_def+0.1;
+		$noise_max=$noise_max+0.2;
 		$max_duration=$max_duration+10;
 #		$max_duration=$newfile_duration+1;
 		$noise_dur_add=$noise_dur_add+0.03;
