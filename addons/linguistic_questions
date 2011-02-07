@@ -4,32 +4,32 @@ WDBNDRY_S
 WDBNDRY_I
 тишина  SIL
 гласные  a aa ay ee i ii ja je jo ju oo u uj uu y yy
-огубленные_лабиализованные  jo oo ju u uj uu
-неогубленные_нелабиализованные  a aa ay ee i ii ja je y yy
-гласные_верхнего_подъема  i ii y yy ju u uj uu
-гласные_нижнего_подъема  a aa ay ja
-гласные_среднего_подъема  ee je oo jo
+огублённые_лабиализованные  jo oo ju u uj uu
+неогублённые_нелабиализованные  a aa ay ee i ii ja je y yy
+гласные_верхнего_подъёма  i ii y yy ju u uj uu
+гласные_нижнего_подъёма  a aa ay ja
+гласные_среднего_подъёма  ee je oo jo
 гласные_переднего_ряда  i ii ee je
 гласные_заднего_ряда  ju u uj uu oo jo
 гласные_среднего_ряда  y yy a aa ay ja
-гласные_после_мягкой_согласной  ee i ii ja je jo ju uj
-гласные_после_твёрдой_согласной  a aa ay oo u uu y yy
+гласные_после_мягкой_согласной  ii ja je jo ju uj i
+гласные_после_твёрдой_согласной  aa ee oo uu yy u ay y a
 ударные_гласные  aa ee ii ja je jo ju oo uu yy
 ударные_гласные_смягчающие  ii ja je jo ju
 ударные_гласные_не_смягчающие  aa ee oo uu yy
-безударные_гласные  a ay i u uj y
+безударные_гласные  a ay u y i uj
 безударные_гласные_смягчающие  i uj
 безударные_гласные_не_смягчающие  a ay u y
-а_подобные  a aa ay ja
+а_подобные  aa ja a ay
 э_подобные  ee je
-ы_подобные  i ii y yy
-у_подобные  u uu ju uj
+ы_подобные  yy ii y i
+у_подобные  uu ju u uj
 о_подобные  oo jo
 ю_пара  ju uj
-а_пара  a aa
-и_пара  i ii
-ы_пара  y yy
-у_пара  u uu
+а_пара  aa a
+и_пара  ii i
+ы_пара  yy y
+у_пара  uu u
 согласные  p pp b bb t tt d dd k kk g gg c ch f ff v vv s ss z zz sh sch zh h hh m mm n nn l ll r rr j
 мягкие_согласные  pp bb tt dd kk gg ff vv ss zz hh mm nn ll rr ch sch j
 твёрдые_согласные  p b t d k g f v s z h m n l r zh sh c
