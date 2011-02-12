@@ -34,7 +34,15 @@ if ( $ARGV[0] ) { $infile=$ARGV[0]; } else { exit; }
 
 my $siltime=0;
 
-($infile_name,$tmp)=split("\.(wav|mp3)",$infile,2);
+if ($infile=~/([\w\.\_\-]+)\.(wav|mp3)/) {
+	$infile_name=$1;
+	$orgext=$2;
+	} else {
+	print "What's $orgext ?\n";
+	exit;
+	}
+
+#($infile_name,$orgext)=split("\.(wav|mp3)",$infile,2);
 $DIC="$infile_name.dic";
 
 $text=`cat $infile_name.text`; chomp($text);
@@ -52,9 +60,11 @@ utf8::decode($text);
 mkdir $infile_name;
 mkdir $infile_name."/etc";
 mkdir $infile_name."/wav";
+mkdir $infile_name."/org";
 
 $prompt=$infile_name."/etc/PROMPTS";
 $wavdir=$infile_name."/wav/";
+$orgdir=$infile_name."/org/";
 
 open(PROMPTS, ">$prompt") or die ("need output file name");
 open(LOG, ">>$prompt.log") or die ("need output file name");
@@ -94,6 +104,8 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 	$dfnum=sprintf "%02d",$fnum;
 	$newfilename=$wavdir.$infile_name."_".$dfnum;
 	$newfile=$newfilename.".wav";
+
+	$orgfile=$orgdir.$infile_name."_".$dfnum.".ogg";
 
 	$noise_max=$noise_max_def;
 	$noise_def=$noise_min_def;
@@ -147,6 +159,10 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 	if ($noise>$noise_max and $noise>=$min_duration) { print "WARNINIG: do not split wav file (silience not found)\n"; last; }
 	if (stat("$newfilename.text")) { last; }
 	}
+
+
+#	$trim_end=$trim+$newfile_duration;
+	system("sox $infile $orgfile trim $trim $newfile_duration");
 
 #	$noise=0.1;
 #	$newfile_duration=$newfile_duration-$siltime-$siltime;		# pad $siltime $siltime
