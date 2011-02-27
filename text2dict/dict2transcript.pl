@@ -31,7 +31,7 @@ my $word;
 my $testword;
 
 
-# глухие?
+# глухие
 $SURD = 'p|pp|f|ff|k|kk|t|tt|sh|s|ss|h|hh|c|ch|sch';
 # гласные
 $VOWEL = 'а|я|о|ё|у|ю|э|е|ы|и|aa|a|oo|o|uu|u|ee|e|yy|y|ii|i|uj|ay|jo|je|ja|ju';
@@ -144,6 +144,7 @@ close(IN);
 #####################################################
 open(NEW,  ">$Bin/new_word.txt")  or die ("can't save new_word.txt");
 
+open(ACCENT, ">$outfilename.accent")   or die ("can't save $outfilename.accent");
 open(WORDS, ">$outfilename")   or die ("can't save $outfilename");
 for my $word ( sort keys %dict)
         {
@@ -286,14 +287,19 @@ for my $word ( sort keys %dict)
 		$transcription{$trword}=$udword;
 		$transcription{$clearword}++;
 		my $str='';
+		my $str2='';
 #		if ($n==0) {
 		if ($transcription{$clearword}==1) {
 			$str="$clearword $trword";
+			$str2="$clearword $udword";
 			} else {
 			$str="$clearword\(".($transcription{$clearword})."\) $trword";
+			$str2="$clearword\(".($transcription{$clearword})."\) $udword";
 			}
 		utf8::encode($str);
 		print WORDS "$str\n";
+		utf8::encode($str2);
+		print ACCENT "$str2\n";
 				}
 
 		$n++;
@@ -302,6 +308,7 @@ for my $word ( sort keys %dict)
 
 
 close(WORDS);
+close(ACCENT);
 close(NEW);
 
 ##########################################################
@@ -368,7 +375,7 @@ $testword=~s/([+]?и н) т ([+]?е р (в|ф|п))/$1 t $1/g;
 $testword=~s/([+]?э с) т ([+]?е т)/$1 t $2/g;
 $testword=~s/([+]?а) н ([+]?е л [+]?я)/$1 n $2/g;
 $testword=~s/^ (с [+]?о) н ([+]?е т)/ $1 n $2/g;
-$testword=~s/(т [+]?у н) н ([+]?е л)/$1 n $2/g;
+#$testword=~s/(т [+]?у н) н ([+]?е л)/$1 n $2/g;
 $testword=~s/^ б ([+]?е к [+]?и н г)/ b $1/g;
 $testword=~s/^ б ([+]?е й к [+]?е р)/ b $2/g;
 $testword=~s/^ (м [+]?о) д ([+]?е с т)/ $1 d $2/g;
@@ -376,35 +383,62 @@ $testword=~s/^ ([+]?э к) з ([+]?е м)/ $1 z $2/g;
 $testword=~s/^ ([+]?э) н ([+]?е й)/ $1 n $2/g;
 $testword=~s/^ б р ([+]?е н д [+]?и)/ б r $1/g;
 
-# Упрощение групп согласных (непроизносимый согласный)
-$testword=~s/с т л/s л/g;	# стл – [сл]: счастливый сча[сл’]ивый
-$testword=~s/с т н/s н/g;	# стн – [сн]: местный ме[сн]ый
-$testword=~s/з д н/z н/g;	# здн – [сн]: поздний по[з’н’]ий ([зн]: поздний по[зн’]ий)
-$testword=~s/з д ц/s ц/g;	# здц – [сц]: под уздцы под у[сц]ы
-$testword=~s/н д ш/n ш/g;	# ндш – [нш]: ландшафт ла[нш]афт
-$testword=~s/н т г/n г/g;	# нтг – [нг]: рентген ре[нг’]ен
-$testword=~s/н д ц/n ц/g;	# ндц – [нц]: голландцы голла[нц]ы
-$testword=~s/р д ц/r ц/g;	# рдц – [рц]: сердце се[рц]е
-$testword=~s/р д ч/r ч/g;	# рдч – [рч’]: сердчишко се[рч’]ишко
-$testword=~s/л н ц/n ц/g;	# лнц – [нц]: солнце со[нц]е
 
-# Не читаемые фонемы
-$testword=~s/т ь с/ц/g;						# девятьсот -> дивицот
-$testword=~s/т с [+]?я/c я/g;
-$testword=~s/с ш [+]?е с т/sh е с т/g;
-$testword=~s/с т с/s с/g;
-$testword=~s/с т ь с/s с/g;
-$testword=~s/с т ц/s ц/g;
-$testword=~s/в с т в/с т в/g;
-$testword=~s/н т ц/n ц/g;
-$testword=~s/н т с/n с/g;
-$testword=~s/н д с/n с/g;
-$testword=~s/н г т/n т/g;
-$testword=~s/ч ш/t ш/g;
-$testword=~s/д ц/ц/g;
+# Work around doubled consonants.
+
+#$testword=~s/^ ([+]?э) м м/ $1 m м/g;
+$testword=~s/б б/б/g;
+$testword=~s/т т/т/g;
+$testword=~s/с с/с/g;
+$testword=~s/ф ф/ф/g;
+$testword=~s/р р/р/g;
+$testword=~s/н н/н/g;
+$testword=~s/м м/м/g;
+$testword=~s/к к/к/g;
+$testword=~s/п п/п/g;
+$testword=~s/л л/л/g;
+$testword=~s/з з/з/g;
+
+# Упрощение групп согласных (непроизносимый согласный)
+$testword=~s/с т л/с л/g;	# стл – [сл]: счастливый сча[сл’]ивый
+$testword=~s/с т н/с н/g;	# стн – [сн]: местный ме[сн]ый
+$testword=~s/з д н/з н/g;	# здн – [сн]: поздний по[з’н’]ий ([зн]: поздний по[зн’]ий)
+$testword=~s/з д ц/с ц/g;	# здц – [сц]: под уздцы под у[сц]ы
+$testword=~s/н д ш/н ш/g;	# ндш – [нш]: ландшафт ла[нш]афт
+$testword=~s/н т г/н г/g;	# нтг – [нг]: рентген ре[нг’]ен
+$testword=~s/н д ц/н ц/g;	# ндц – [нц]: голландцы голла[нц]ы
+$testword=~s/р [дт] ц/р ц/g;	# рдц – [рц]: сердце се[рц]е
+$testword=~s/р д ч/р ч/g;	# рдч – [рч’]: сердчишко се[рч’]ишко
+$testword=~s/л н ц/н ц/g;	# лнц – [нц]: солнце со[нц]е
+$testword=~s/с т с я/с ц а/g;
+$testword=~s/с т ь с я/с ц а/g;
+$testword=~s/с т с/с/g;
+$testword=~s/с т ь с/с/g;
+$testword=~s/с т ц/с ц/g;
+$testword=~s/ч ш/т ш/g;
+
+# Не читаемые фонемы (http://www.verbo.ru/)
+$testword=~s/[тд] с [+]?я/ц я/g;
+$testword=~s/[тд] ь с/ц/g;		# девятьсот -> дивицот
+$testword=~s/х [тд] с/х с/g;
+$testword=~s/н (к|г) т/$1 т/g;
+$testword=~s/н [тд] с/н с/g;
+$testword=~s/н [тд] ц/н ц/g;
+$testword=~s/[вф] с т в/с т в/g;
+$testword=~s/[зс] ч/щ/g;
+$testword=~s/[зс] ш/ш/g;		# бе[шш]умный, кофта и[ш ш]ерсти
+$testword=~s/[зс] щ/щ/g;
+$testword=~s/[зс] ж/ж/g;		# бе[жж]алостный, нитка [ж ж]емчугом, ви[ж'ж']ать
+$testword=~s/[тд] ц/ц/g;
+$testword=~s/[тд] ч/ч/g;
+$testword=~s/[тд] щ/ч щ/g;
+$testword=~s/д с т/ц т/g;
+
 
 # Варианты оглушения
 $testword=~s/г к/h к/g;						# легка -> лехка
+
+# $testword=~s/с ш [+]?е с т/sh е с т/g;
 
 # варианты произношения: в слове «двоечник» произносится звукосочетание [чн], но допускается произношение [шн]
 # произношение [шн] на месте ЧН в некоторых словах: яичница, скучный, что, чтобы, конечно
@@ -425,20 +459,7 @@ $testword=~s/г к/h к/g;						# легка -> лехка
 # - форморазличительную, т.к. отличает друг от друга формы одного и того же слова (воды' в род п. ед. ч. – во'ды в им. п. мн.ч.),
 # - стилистическую, т.к. отличает варианты и формы общенародного языка (проф. шо'фер – общелит. шофер').
 
-# Work around doubled consonants.
 
-$testword=~s/^ ([+]?э) м м/ $1 m м/g;
-$testword=~s/б б/б/g;
-$testword=~s/т т/т/g;
-$testword=~s/с с/с/g;
-$testword=~s/ф ф/ф/g;
-$testword=~s/р р/р/g;
-$testword=~s/н н/н/g;
-$testword=~s/м м/м/g;
-$testword=~s/к к/к/g;
-$testword=~s/п п/п/g;
-$testword=~s/л л/л/g;
-$testword=~s/з з/з/g;
 
 # обозначают гласный и мягкость предшествующего парного по твердости / мягкости согласного звука: мёл [м'ол] – ср.: мол [мол]
 # исключение может составлять буква е в заимствованных словах, не обозначающая мягкости предшествующего согласного – пюре [п'урэ́];
@@ -460,8 +481,8 @@ $testword=~s/ф ([+]?($SOFTLETTERS)) /ff $1 /g;
 $testword=~s/х ([+]?($SOFTLETTERS)) /hh $1 /g;
 
 # иногда согласные Н и С смягчаются перед некоторыми мягкими согласными
-$testword=~s/ н (tt|sch|ch) / nn $1 /g;		# ан'тичнось, жен'щин
-$testword=~s/ с (tt|sch|ch) / ss $1 /g;
+$testword=~s/ н (tt|sch|ch|щ|ч) / nn $1 /g;		# ан'тичнось, жен'щин
+$testword=~s/ с (tt|sch|ch|щ|ч) / ss $1 /g;
 
 #$testword=~s/ ([+]?($SOFTLETTERS)) б ($SOFT_SONAR) / $1 bb $3 /g;
 #$testword=~s/ ([+]?($SOFTLETTERS)) в ($SOFT_SONAR) / $1 vv $3 /g;
@@ -567,14 +588,14 @@ $testword=~s/ь $//;			# мягкий знак на конце больше не
 
 
 # Позиционное употребление согласных по имым признакам. Расподобление согласных.
-$testword=~s/ s sh / sh /g;	# [с] + [ш]  -> [шш]: сшить [шшыт’] = [шыт’]
-$testword=~s/ s ch / sch /g;	# [с] + [ч’] -> [щ’] или [щ’ч’]: с чем-то [щ’э́мта] или [щ’ч’э́мта],
-$testword=~s/ s sch / sch /g;	# [с] + [щ’] -> [щ’]: расщепить [ращ’ип’и́т’]
-$testword=~s/ z zh / zh /g;	# [з] + [ж]  -> [жж]: изжить [ижжы́т’] = [ижы́т’]
+#$testword=~s/ s sh / sh /g;	# [с] + [ш]  -> [шш]: сшить [шшыт’] = [шыт’]
+#$testword=~s/ s ch / sch /g;	# [с] + [ч’] -> [щ’] или [щ’ч’]: с чем-то [щ’э́мта] или [щ’ч’э́мта],
+#$testword=~s/ s sch / sch /g;	# [с] + [щ’] -> [щ’]: расщепить [ращ’ип’и́т’]
+#$testword=~s/ z zh / zh /g;	# [з] + [ж]  -> [жж]: изжить [ижжы́т’] = [ижы́т’]
 $testword=~s/ t s / c /g;	# [т] + [с]  -> [цц] или [цс]: мыться [мы́цца] = [мы́ца], отсыпать [ацсы́пат’]
-$testword=~s/ t c / c /g;	# [т] + [ц]  -> [цц]: отцепить [аццып’и́т’] = [ацып’и́т’]
-$testword=~s/ t ch / ch /g;	# [т] + [ч’] -> [ч’ч’]: отчет [ач’ч’о́т] = [ач’о́т]
-$testword=~s/ t sch / ch sch /g;# [т] + [щ’] -> [ч’щ’]: отщепить [ач’щ’ип’и́т’]
+#$testword=~s/ t c / c /g;	# [т] + [ц]  -> [цц]: отцепить [аццып’и́т’] = [ацып’и́т’]
+#$testword=~s/ t ch / ch /g;	# [т] + [ч’] -> [ч’ч’]: отчет [ач’ч’о́т] = [ач’о́т]
+#$testword=~s/ t sch / ch sch /g;# [т] + [щ’] -> [ч’щ’]: отщепить [ач’щ’ип’и́т’]
 
 # Спецзамена
 $testword=~s/Б/b/g;
@@ -621,7 +642,11 @@ $testword=~s/ и о а / и а /g;				# радиоактивных [и]
 $testword=~s/ и э / и /g;				# полиэтилен [и]
 
 # Й
-$testword=~s/( [+]?($STARTSYL) |^ )([+]?[юяеё])/$1\j $3/g;	# звуки [ ю я е ё ]
+#$testword=~s/( [+]?($STARTSYL) |^ )([+]?[юяеё])/$1\j $3/g;	# звуки [ ю я е ё ]
+$testword=~s/( ($STARTSYL)) (\+[юяеё])/$1 j $3/g;		# звуки [ ю я е ё ]
+$testword=~s/( [ьъ]) ([юяеё])/$1 j $2/g;			# звуки [ ю я е ё ]
+#$testword=~s/( ($STARTSYL)) (\+[ю])/$1 j $3/g;			# звуки [ ю ]
+$testword=~s/^ ([+]?[юяеё])/ j $1/g;				# звуки [ ю я е ё ]
 $testword=~s/((ь|ъ) )([+]?[иоэ])/$1\j $3/g;			# бабьим [бабьйим], лосьон [лосьён]
 
 # после твёрдых согласных - гласные становятся грухими
@@ -672,7 +697,7 @@ $testword=~s/ [ю]/ uj/g;	# Y - новуЮ
 
 # звук j между безударными гласными не произносится
 #$testword=~s/ ($VOWEL) j ($VOWEL) / $1 $2 /g; 				# [новуЮ],[ое]
-$testword=~s/ ([+]?($VOWEL)) j ($VOWEL) / $1 $3 /g; 			# [новуЮ],[ое]
+#$testword=~s/ ([+]?($VOWEL)) j ($VOWEL) / $1 $3 /g; 			# [новуЮ],[ое]
 
 }
 

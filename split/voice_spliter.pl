@@ -129,12 +129,12 @@ while($trim<$infile_duration-$min_duration) { # возможно в конце �
 		}
 	$newfile_duration=`soxi -D $newfile`; chomp($newfile_duration);
 #	if ($newfile_duration<2)  { $noise=$noise-0.001; }
-	if ($newfile_duration<10) { $word_in_sec=0.8; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
-	if ($newfile_duration<6)  { $word_in_sec=0.3; }
+	if ($newfile_duration<11) { $word_in_sec=0.8; }		# Если длительность маленькая следует перестраховаться, слова произносятся медленно
+	if ($newfile_duration<7)  { $word_in_sec=0.3; }
 
 
-	if ($newfile_duration>50) {
-		$noise=$noise+0.05;
+	if ($newfile_duration>60) {
+		$noise=$noise+0.04;
 		}
 
 	if ($newfile_duration>100) {				# зашумлённая запись

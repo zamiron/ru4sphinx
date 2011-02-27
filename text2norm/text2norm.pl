@@ -105,7 +105,9 @@ while (my $inline = <IN>)
         $inline =~ s/ - / /g;
         $inline =~ s/[^\w\d\-\/\%]/ /g;
         $inline =~ s/cу/су/g;
-        $inline =~ s/ и т.д./ и так далее /g;
+        $inline =~ s/ и т\.д\./ и так далее /g;
+        $inline =~ s/ т\.е\./ тоесть/g;
+        $inline =~ s/ св\./ святого/g;
         $inline =~ s/ гр-на / гражданина /g;
         $inline =~ s/ гр-н / гражданин /g;
         $inline =~ s/ г-н / господин /g;
@@ -121,8 +123,8 @@ while (my $inline = <IN>)
         $inline =~ s/(1)(\s+)?\%/$1 процент /g;
         $inline =~ s/(2|3|4)(\s+)?\%/$1 процента /g;
         $inline =~ s/\%/ процентов /g;
-
         $inline =~ s/[\s]+/ /g;
+
 	$inline = lc($inline);
 
 	@words=split(" ",$inline);
@@ -139,6 +141,7 @@ while (my $inline = <IN>)
 
 	$preline=$outline;
 	$outline=~s/\-$//;
+        $outline=~s/ - / /g;
 	utf8::encode($outline);
 	print OUT $outline;
 }
