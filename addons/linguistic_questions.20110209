@@ -1,0 +1,81 @@
+WDBNDRY_B
+WDBNDRY_E
+WDBNDRY_S
+WDBNDRY_I
+тишина  SIL
+гласные  a aa ay ee i ii ja je jo ju oo u uj uu y yy
+огублённые_лабиализованные  jo oo ju u uj uu
+неогублённые_нелабиализованные  a aa ay ee i ii ja je y yy
+гласные_верхнего_подъёма  ii yy uu ju u uj i y
+гласные_среднего_подъёма  ee je oo jo
+гласные_нижнего_подъёма_а_подобные  aa ja a ay
+гласные_переднего_ряда  ii ee je i
+гласные_заднего_ряда  ju u uj uu oo jo
+гласные_среднего_ряда  y yy a aa ay ja
+гласные_после_мягкой_согласной  ii ja je jo ju uj i
+гласные_после_твёрдой_согласной  aa ee oo uu yy u ay y a
+ударные_гласные  aa ee ii ja je jo ju oo uu yy
+ударные_гласные_смягчающие  ii ja je jo ju
+ударные_гласные_не_смягчающие  aa ee oo uu yy
+безударные_гласные  a ay u y i uj
+безударные_гласные_смягчающие  i uj
+безударные_гласные_не_смягчающие  a ay u y
+э_подобные  ee je
+ы_подобные  yy ii y i
+у_подобные  uu ju u uj
+о_подобные  oo jo
+ю_пара  ju uj
+а_пара  aa a
+и_пара  ii i
+ы_пара  yy y
+у_пара  uu u
+согласные  p pp b bb t tt d dd k kk g gg c ch f ff v vv s ss z zz sh sch zh h hh m mm n nn l ll r rr j
+мягкие_согласные  pp bb tt dd kk gg ff vv ss zz hh mm nn ll rr ch sch j
+твёрдые_согласные  p b t d k g f v s z h m n l r zh sh c
+шипящие  ch sch sh zh
+свистящие  c s ss z zz
+смычно-проходные  l ll m mm n nn
+шумные  b bb p pp d dd t tt g gg k kk c ch v vv zh z zz s ss f ff h hh sh sch
+взрывные  b bb p pp d dd t tt g gg k kk
+слитные_аффрикаты  c ch
+щелевые_фрикативные  v vv zh z zz s ss f ff h hh sh sch
+сонорные  m mm n nn l ll j r rr
+носовые  m mm n nn
+л_пара_по_мягкости_боковые  l ll
+образует_звуки_ЯЁЕЮЙ_скользящая_палатальная  j
+р_пара_по_мягкости_дрожащие  r rr
+губные  b bb p pp m mm v vv f ff
+губно-губные  b bb p pp m mm
+вф_образные_парные_лабиодентальные_губно-зубные  v vv f ff
+переднеязычные  d dd t tt n nn c ch z zz s ss zh sh l ll r rr sch
+переднеязычные_зубные  t d s ss z zz n l rr
+переднеязычные_альвеолярные  tt dd c nn ll
+переднеязычные_постальвеолярные  ch sh zh r sch
+заднеязычные_веолярные  g gg k kk h hh
+звонкие_согласные  b bb v vv g gg d dd zh z zz l ll m mm n nn r rr j
+глухие_согласные  k kk p pp s ss t tt f ff h hh c ch sh sch
+всегда_глухие  h hh c ch
+могут_оглушаться  b bb v vv g gg d dd zh z zz
+могут_озвончиваться  k kk p pp s ss t tt f ff sh
+не_парные  zh sh c ch sch j
+твёрдые_не_парные  zh sh c
+мягкие_не_парные  ch sch j
+бп_образные_парные  p pp b bb
+дт_образные_парные  d dd t tt
+гк_образные_парные  g gg k kk
+зс_образные_парные_зубные  z zz s ss
+жш_образные_парные  zh sh
+п_пара_по_мягкости  p pp
+б_пара_по_мягкости  b bb
+т_пара_по_мягкости  t tt
+д_пара_по_мягкости  d dd
+к_пара_по_мягкости  k kk
+г_пара_по_мягкости  g gg
+ф_пара_по_мягкости  f ff
+в_пара_по_мягкости  v vv
+с_пара_по_мягкости  s ss
+з_пара_по_мягкости  z zz
+х_пара_по_мягкости  h hh
+м_пара_по_мягкости  m mm
+н_пара_по_мягкости  n nn
+ш_пара_по_мягкости_шипящие  sh sch

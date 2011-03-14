@@ -1,0 +1,22 @@
+It project help cut/split audio-book in part (10 - 30 seconds) and creating russian voice model
+project contain modules:
+
+1) https://github.com/zamiron/ru4sphinx/tree/master/split
+core spliter module, need perl, sox and sphinx3 (support any language in theory)
+
+2) https://github.com/zamiron/ru4sphinx/tree/master/split/msu_ru_zero.mllt_cd_cont_2000
+my last russian voice model for sphinx. Quality test:
+TOTAL Words: 79878 Correct: 76159 Errors: 4420
+TOTAL Percent correct = 95.34% Error = 5.53% Accuracy = 94.47%
+TOTAL Insertions: 701 Deletions: 1245 Substitutions: 2474
+
+3) https://github.com/zamiron/ru4sphinx/tree/master/text2dict
+russian transcriptor module, need perl
+contain russian dictonary accent
+it program creating dictonaty (.dic files) for cmu sphinx
+
+4) https://github.com/zamiron/ru4sphinx/tree/master/text2norm
+russian text normalization
+
+5) https://github.com/zamiron/ru4sphinx/blob/master/addons/linguistic_questions
+russian linguistic_questions for sphinxtrain
