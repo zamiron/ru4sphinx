@@ -2,13 +2,9 @@
 
 use utf8;
 use POSIX;
+use FindBin qw($Bin);
 
-#$dict="/daemon/utils/sphinx/split/msu_ru_zero.dic";
-#$dict="/daemon/utils/sphinx/transcript/udarenie.txt";
-#$dict="/daemon/utils/sphinx/transcript/yo_word.txt";
-#$dict="/home/SphinxTrain/etc/msu_ru_zero.dic";
-
-$dict='cat ../text2dict/*.txt|';
+$dict="cat $Bin/../text2dict/*.txt|";
 
 my @ch_t;
 
@@ -51,10 +47,7 @@ my @ch_t;
 @ch_s[8]='восемьсот';
 @ch_s[9]='девятьсот';
 
-#print '|';
-#uprint (wdigits(1,'1230','я'));
-#print '|';
-#exit;
+
 
 if ( $ARGV[0] ) { $infile=$ARGV[0]; } else { exit; }
 
@@ -68,7 +61,9 @@ my %tdict;
 while (my $inline = <DICT>)
 {
         chomp $inline;
-        $inline =~ s/\(\d\)//g;
+        $inline =~ s/\(\d\)//g;		# word(2)
+        $inline =~ s/^\-//;		# -word
+        $inline =~ s/\- / /;		# word-
         utf8::decode($inline);
         my ($word,$text) = split(/[\s]+/,$inline,2);
         $word=~s/\+//g;
@@ -95,53 +90,186 @@ open(OUT, ">$outfile") or die ("need output file name");
 $preline='';
 while (my $inline = <IN>)
 {
-        chomp $inline;
-        utf8::decode($inline);
-#        $inline =~ s/\-\r\n//;
-#        $inline =~ s/\-\r\n//;
-#        $inline =~ s/\-\r//;
 
+        chomp $inline;
+	$inline.=' ';
+        utf8::decode($inline);
+
+# удаляем мусор
+        $inline =~ s/[\r\n\t\_]/ /g;
+        $inline =~ s/є/ /g;
+
+# оставить только буквы, цифры, пробелы и тире
+	$inline =~ s/[^\w\d\-\s]+/./g;
         $inline =~ s/[\-]+/-/g;
-        $inline =~ s/ - / /g;
-        $inline =~ s/[^\w\d\-\/\%]/ /g;
+	$inline =~ s/[\-\.]+(\s+)?[\-\.]+/./g;
+
+# здесь не помешает цикл и проверка на то что анг. буква расположена в конце
+while($inline ne $oldline) {
+
+	$oldline = $inline;
+	$inline =~ s/[T]([а-яА-Я])/Т$1/g;
+	$inline =~ s/[Ee]([а-яА-Я])/е$1/g;
+	$inline =~ s/[Oo]([а-яА-Я])/о$1/g;
+	$inline =~ s/[Pp]([а-яА-Я])/р$1/g;
+	$inline =~ s/[Aa]([а-яА-Я])/а$1/g;
+	$inline =~ s/[H]([а-яА-Я])/н$1/g;
+	$inline =~ s/[Kk]([а-яА-Я])/к$1/g;
+	$inline =~ s/[Cc]([а-яА-Я])/с$1/g;
+	$inline =~ s/[B]([а-яА-Я])/в$1/g;
+	$inline =~ s/[M]([а-яА-Я])/м$1/g;
+	$inline =~ s/[y]([а-яА-Я])/у$1/g;
+	$inline =~ s/[n]([а-яА-Я])/п$1/g;
+
+	$inline =~ s/([а-яА-Я])[T]/$1Т/g;
+	$inline =~ s/([а-яА-Я])[Ee]/$1е/g;
+	$inline =~ s/([а-яА-Я])[Oo]/$1о/g;
+	$inline =~ s/([а-яА-Я])[Pp]/$1р/g;
+	$inline =~ s/([а-яА-Я])[Aa]/$1а/g;
+	$inline =~ s/([а-яА-Я])[H]/$1н/g;
+	$inline =~ s/([а-яА-Я])[Kk]/$1к/g;
+	$inline =~ s/([а-яА-Я])[Cc]/$1с/g;
+	$inline =~ s/([а-яА-Я])[B]/$1в/g;
+	$inline =~ s/([а-яА-Я])[M]/$1м/g;
+	$inline =~ s/([а-яА-Я])[y]/$1у/g;
+	$inline =~ s/([а-яА-Я])[n]/$1п/g;
+
+	}
+
+# игнорируем мусор
+	if ( $inline =~ /\s+\W+\s+\d+\s+\W+\s+/ ) { next; }
+#print "1 $inline\n";
+
+	$inline = lc($inline);
+
+# римские цифры
+        $inline =~ s/ i / первая /g;
+        $inline =~ s/ ii / вторая /g;
+        $inline =~ s/ iii / третья /g;
+        $inline =~ s/ iv / четвёртая /g;
+        $inline =~ s/ v / пятая /g;
+        $inline =~ s/ vi / шестая /g;
+        $inline =~ s/ vii / седьмая /g;
+        $inline =~ s/ viii / восьмая /g;
+        $inline =~ s/ ix / девятая /g;
+        $inline =~ s/ x / десятая /g;
+        $inline =~ s/ xi / одинадцатая /g;
+        $inline =~ s/ xii / двенадцатая /g;
+        $inline =~ s/ xiii / тринадцатая /g;
+        $inline =~ s/ xiv / четырнадцатая /g;
+        $inline =~ s/ xv / пятнадцатая /g;
+        $inline =~ s/ xvi / шестнадцатая /g;
+        $inline =~ s/ xvii / семнадцатая /g;
+        $inline =~ s/ xviii / восемнадцатая /g;
+        $inline =~ s/ xix / девятнадцатая /g;
+        $inline =~ s/ xx / двадцатая /g;
+        $inline =~ s/ xxi / двадцать первая /g;
+
+# убираем англоязычные буквы
+        $inline =~ s/[a-zA-Z]+/ /g;
+
+
+        while ($inline =~ s/ \- / /g) {};
+        $inline =~ s/^(\s+)?\-(\s+)?//;
+
+# (1765-1824)
+	$inline =~ s/[\W]ок./около/;
+	$inline =~ s/\.[\s+]?(\d+)[\s+]?\-[\s+]?(\d+)[\s+]?\./. с $1го по $2й ./g;
+
+#print "2 $inline\n";
+
+# Н Е    С П Е Ш И Т Е     П О К У П А Т Ь,    Н Е     Ш В Ы Р Я Й Т Е С Ь
+        if ( $inline =~ /^(\w[\s\.]+)((\w[\s\.]+)+)(\w)$/ ) {
+                while($inline =~ s/(\w) (\w)/$1$2/g) {};
+                }
+        while ( $inline =~ / (\w \w )((\w )+)(\w)?/ ) {
+                my $word=$1.$2.$4;
+                my $word_norm = $word;
+                $word_norm =~ s/ //g;
+                $inline =~ s/$word/$word_norm /g;
+                }
+
+
+#print "3 $inline\n";
+
         $inline =~ s/cу/су/g;
         $inline =~ s/ и т\.д\./ и так далее /g;
+        $inline =~ s/ и т\.п\./ и тому подобное /g; 
         $inline =~ s/ т\.е\./ тоесть/g;
         $inline =~ s/ св\./ святого/g;
+
+        $inline =~ s/([\d]+)(Ч|x)([\d]+)/$1 на $3/g;	# [фото] 3x4
+        $inline =~ s/ г\./ год/g;
+        $inline =~ s/ гг\./ годах/g;
+        $inline =~ s/ изд\./ издание/g;
+        $inline =~ s/\// дробь /g;
+
+        $inline =~ s/(1)(\s+)?\%/$1 процент /g;
+        $inline =~ s/(2|3|4)(\s+)?\%/$1 процента /g;
+        $inline =~ s/\%/ процентов /g;
+
+#        $inline =~ s/[^\w\d\-\/\%\s]+/ . /g;
+
+# иные символы (смещение точки)
+        $inline =~ s/[^\w\d\-\s]+/ . /g;	# все символы кроме букв, цифр, тире, пробелов
+        while ($inline =~ s/\.[\s]+\././g) {};
+
         $inline =~ s/ гр-на / гражданина /g;
         $inline =~ s/ гр-н / гражданин /g;
         $inline =~ s/ г-н / господин /g;
         $inline =~ s/ г-на / господина /g;
-        $inline =~ s/ґ//g;
-        $inline =~ s/(\w) \-(\w)/$1\-$2/g;
-        $inline =~ s/(\w)\- (\w)/$1\-$2/g;
 
-        $inline =~ s/([\d]+)(Ч|x)([\d]+)/$1 на $3/g;	# [фото] 3x4
-        $inline =~ s/ г\./ год/g;
-        $inline =~ s/ изд\./ издание/g;
-        $inline =~ s/\// дробь /g;
-        $inline =~ s/(1)(\s+)?\%/$1 процент /g;
-        $inline =~ s/(2|3|4)(\s+)?\%/$1 процента /g;
-        $inline =~ s/\%/ процентов /g;
-        $inline =~ s/[\s]+/ /g;
+#print "4 $inline\n";
 
-	$inline = lc($inline);
+# числа
+	$inline =~ s/(\d+) (году )/$1м $2/g;
+	$inline =~ s/(\d+) (года )/$1го $2/g;
+	$inline =~ s/(\d+) (годах )/$1х $2/g;
+	$inline =~ s/(\d+) (\w+и )/$1е $2/g;
+	$inline =~ s/(\d+) (\w+а )/$1я $2/g;
+	$inline =~ s/(\d+) (\w+[уь] )/$1ю $2/g;
+	$inline =~ s/(\d+) (\w+я )/$1го $2/g;
+	while ($inline =~ s/(\d+)\-(\d+)/$1 $2/g) {};
 
-	@words=split(" ",$inline);
+#print "5 $inline\n";
+
+
+# тире
+	$inline =~ s/\-[\s]+$/-/;
+        $inline =~ s/(\w) \-(\w)/$1-$2/g;
+        $inline =~ s/(\w)\- (\w)/$1-$2/g;
+        $inline =~ s/(\w)\- /$1 /g;
+        $inline =~ s/ \-(\w)/ $1/g;
+
+#print "6 $inline\n";
+
+# удаляем лишние пробелы
+#        $inline =~ s/[\s]+/ /g;
+        $inline =~ s/^[\s]+//;
+        $inline =~ s/[\s]+$//;
+
+#print "7 $inline\n";
+
+	@words=split(/\s+/,$inline);
 	undef $outline;
         for (my $ni = 0; $ni <= $#words; $ni++)
         {
-#		@words[$ni]=wcheck($ni);
-#		@words[$ni]=wcheck($ni);
+
+#		print "$ni $outline\n";
+		if (@words[$ni] eq '.') { $outline.="\n"; next; }
 		if ($ni==0 and $preline=~/\-$/) { $outline.=wcheck($ni); } else { $outline.=" ".wcheck($ni); }
-#		$outline.=" ".@words[$ni];
-#		$outline.=" ".wcheck($ni);
         }
 
 
 	$preline=$outline;
 	$outline=~s/\-$//;
-        $outline=~s/ - / /g;
+#        $outline=~s/ - / /g; #?
+#        $outline=~s/^\s+//;
+        $outline=~s/\n\s+/\n/g;
+
+#       $outline=~s/[\n]+/\n/g;
+#	if ($outline=~/[\w]+/) { } else { next; }
+
 	utf8::encode($outline);
 	print OUT $outline;
 }
@@ -166,7 +294,7 @@ sub wcheck {
 #		if ( @words[$wn+1] eq 'декабря' ) { @words[$wn]='одинадцатое'; }
 #		}
 
-	if (@words[$wn]=~/([\d]+)([\w\-]+)?/) {
+	if (@words[$wn]=~/([\d]+)[\-]?([\w]+)?/) {
 		$rtext=wdigits($wn,$1,$2);
 		}
 
@@ -180,7 +308,7 @@ sub wdigits {
 	my $wn=@_[0];
 	my $digits=@_[1];
 	my $end=@_[2];
-	$end=~s/-//g;
+#	$end=~s/-//g;
 
 	$str=sdigits($digits);
 	$str=~s/ $//;
@@ -475,9 +603,37 @@ sub dict {
         my ($word)=@_;
         if ($word and !$dict{$word}) {
                 my $found=0;
+# если в словаре нет слова через Е, но есть слово Ё
                 if ($edict{$word}) { $word=$edict{$word}; $found++; }
+# если в словаре нет слитного слова, но есть слово через тире
                 if ($tdict{$word}) { $word=$tdict{$word}; $found++; }
                 if ($found==0) { uprint("$word not found in dict\n"); }
                 }
 return $word;
 }
+
+
+
+
+
+# 123-4-567
+#	if ( $inline =~ / (\d+)((\-\d+)+(\-\d+)+) / ) {
+#		my $word=$1.$2;
+#		my $word_norm = $word;
+#		$word_norm =~ s/-/ /g;
+#		$inline =~ s/$word/$word_norm/g;
+#		}
+# а б р а к а д а б р а
+
+#print '|';
+#uprint (wdigits(1,'1230','я'));
+#print '|';
+#exit;
+
+# а-а-а-алы-ы-ы-ый
+#	if ( $inline =~ / (\w+)((\-\w+)+(\-\w+)+) / ) {
+#		my $word=$1.$2;
+#		my $word_norm = $word;
+#		$word_norm =~ s/-//g;
+#		$inline =~ s/$word/$word_norm/g;
+#		}

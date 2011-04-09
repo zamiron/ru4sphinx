@@ -111,7 +111,73 @@ while (my $inline = <IN>)
 		}
 	$udar{$n}{$clword}=$udword;
 	}
-####
+#### Если слово содёржит Ё добавить его в трнаскрипцию как слово с буквой Е
+
+#### Иногда гласные в конце не оглушаются и глугие озвончиваются
+	if ($clword=~/[бп]$/) {
+		$udword=~s/^(.+)[бп]$/$1Б/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+
+	if ($clword=~/[дт]$/) {
+		$udword=~s/^(.+)[дт]$/$1Д/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+
+	if ($clword=~/[гк]$/) {
+		$udword=~s/^(.+)[гк]$/$1Г/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+
+	if ($clword=~/[зс]$/) {
+		$udword=~s/^(.+)[зс]$/$1З/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+
+	if ($clword=~/[жш]$/) {
+		$udword=~s/^(.+)[жш]$/$1Ж/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+#### Иногда гласные в конце не оглушаются и глугие озвончиваются
+
+#### в [ы]зысканный фарфор
+	if ($clword=~/^и/) {
+		$udword=~s/^и(.+)$/ы$1/;
+		$n=0;
+        	while ( $udar{$n}{$clword} ) {
+                	if ($udar{$n}{$clword} eq $udword) { break; }
+                $n++;
+                }
+		$udar{$n}{$clword}=$udword;
+	}
+#### в [ы]зысканный фарфор
+
+
 
 }
 
@@ -126,7 +192,11 @@ while (my $inline = <IN>)
 {
         chomp $inline;
         utf8::decode($inline);
-	$inline =~ s/\([\w\d\.\_\-]+\)//g;
+#	$inline =~ s/\([\w\d\.\_\-]+\)//g;
+	$inline =~ s/\(.+\)$//;
+	$inline =~ s/\<s\>//g;
+	$inline =~ s/\<\/s\>//g;
+
 #	$inline=~s/ё/е/g; #!
 	$inline=~s/\+//g;
 
