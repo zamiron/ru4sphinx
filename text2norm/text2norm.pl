@@ -96,8 +96,8 @@ while (my $inline = <IN>)
         utf8::decode($inline);
 
 # удаляем мусор
-        $inline =~ s/[\r\n\t\_]/ /g;
-        $inline =~ s/є/ /g;
+        $inline =~ s/[\r\n\t\_\"\'\,\:]/ /g;
+        $inline =~ s/[єЄґ]//g;
 
 # оставить только буквы, цифры, пробелы и тире
 	$inline =~ s/[^\w\d\-\s]+/./g;
@@ -173,7 +173,7 @@ while($inline ne $oldline) {
         $inline =~ s/^(\s+)?\-(\s+)?//;
 
 # (1765-1824)
-	$inline =~ s/[\W]ок./около/;
+	$inline =~ s/[\W]ок\./около/;
 	$inline =~ s/\.[\s+]?(\d+)[\s+]?\-[\s+]?(\d+)[\s+]?\./. с $1го по $2й ./g;
 
 #print "2 $inline\n";
@@ -256,6 +256,7 @@ while($inline ne $oldline) {
         {
 
 #		print "$ni $outline\n";
+		if (@words[$ni] eq 'ъ' or @words[$ni] eq 'ь') { next; }
 		if (@words[$ni] eq '.') { $outline.="\n"; next; }
 		if ($ni==0 and $preline=~/\-$/) { $outline.=wcheck($ni); } else { $outline.=" ".wcheck($ni); }
         }

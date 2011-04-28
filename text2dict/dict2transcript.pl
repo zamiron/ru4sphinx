@@ -66,12 +66,13 @@ $SOGL='б|в|г|д|з|к|л|м|н|й|п|р|с|т|ф|х|ж|ш|щ|ц|ч|ь|ъ|-|\'
 #####################################################
 @dicfile[0]='yo_word.txt';
 @dicfile[1]='add_word.txt';
-@dicfile[2]='emo_word.txt';
-@dicfile[3]='morph_word.txt';
-@dicfile[4]='small_word.txt';
-@dicfile[5]='sokr_word.txt';
-@dicfile[6]='not_word.txt';
-@dicfile[7]='all_form.txt';
+@dicfile[2]='all_form.txt';
+
+@dicfile[3]='sokr_word.txt';
+@dicfile[4]='emo_word.txt';
+@dicfile[5]='morph_word.txt';
+@dicfile[6]='small_word.txt';
+@dicfile[7]='not_word.txt';
 
 foreach (@dicfile)
 {
@@ -113,6 +114,7 @@ while (my $inline = <IN>)
 	}
 #### Если слово содёржит Ё добавить его в трнаскрипцию как слово с буквой Е
 
+if (1==2) { # пока отключено
 #### Иногда гласные в конце не оглушаются и глугие озвончиваются
 	if ($clword=~/[бп]$/) {
 		$udword=~s/^(.+)[бп]$/$1Б/;
@@ -176,7 +178,7 @@ while (my $inline = <IN>)
 		$udar{$n}{$clword}=$udword;
 	}
 #### в [ы]зысканный фарфор
-
+}
 
 
 }
@@ -219,138 +221,157 @@ open(WORDS, ">$outfilename")   or die ("can't save $outfilename");
 for my $word ( sort keys %dict)
         {
 	$clearword=$word;
-	$n=0;
-	if (!$udar{$n}{$word}) { # если нет в словаре
+
+	if (!$udar{0}{$word}) { # если нет в словаре
+############## Автоударение ####
 #	uprint("неизвестное слово: $word");
-############## Автоударение ####
-	$word =~ s/ё/+ё/g;
-	$word =~ s/ьо/ь+о/g;
-	$word =~ s/йо/й+о/g;
-	$word =~ s/чо/ч+о/g;
-	$word =~ s/що/щ+о/g;
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/нида/н+ида/;		# леонида
-	}
+#	$word =~ s/ё/+ё/g;
+#	$word =~ s/ьо/ь+о/g;
+#	$word =~ s/йо/й+о/g;
+#	$word =~ s/чо/ч+о/g;
+#	$word =~ s/що/щ+о/g;
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/нида/н+ида/;		# леонида
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/ирую/+ирую/;		# культивирующаяся
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/напя/нап+я/;		# напяливаете
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/знава/знав\+а/;	# опознаваемых
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/знача/знач\+а/;	# предназначавшаяся
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/ига/иг\+а/;		# отодвигаемого
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/([\w])мина([\w])/$1мин+а$2/;		# воспоминание
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/([\w])лав/$1л+ав/;	# Ярослав
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/([\w])янов/$1+янов/;	# Ульянов
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/([\w])([\w])нович/$1+$2нович/;	# флорентинович
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/какого/как\+ого/;
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/нибудь/ниб\+удь/;
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/сматр/см+атр/;
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/еча/еч\+а/;
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^кое\-/к+ое-/;
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^как([w+])\-/как+$1\-/;
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^чьего\-/чьег+о\-/;
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^чьему\-/чьем+у\-/;
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^чь([\w]+)\-/чь+$1\-/;
+#	}
+#        if ($word=~/\+/) { } else
+#        {
+#		$word =~ s/^это([\w]+)\-/+это$1\-/;
+#	}
+#
+#        if ($word=~/\+/) { } else
+#        	{
 
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/ирую/+ирую/;		# культивирующаяся
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/напя/нап+я/;		# напяливаете
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/знава/знав\+а/;	# опознаваемых
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/знача/знач\+а/;	# предназначавшаяся
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/ига/иг\+а/;		# отодвигаемого
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/([\w])мина([\w])/$1мин+а$2/;		# воспоминание
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/([\w])лав/$1л+ав/;	# Ярослав
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/([\w])янов/$1+янов/;	# Ульянов
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/([\w])([\w])нович/$1+$2нович/;	# флорентинович
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/какого/как\+ого/;
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/нибудь/ниб\+удь/;
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/сматр/см+атр/;
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/еча/еч\+а/;
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^кое\-/к+ое-/;
-	}
-
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^как([w+])\-/как+$1\-/;
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^чьего\-/чьег+о\-/;
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^чьему\-/чьем+у\-/;
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^чь([\w]+)\-/чь+$1\-/;
-	}
-        if ($word=~/\+/) { } else
-        {
-		$word =~ s/^это([\w]+)\-/+это$1\-/;
-	}
-
-        if ($word=~/\+/) { } else
-        	{
 ######## Автоматическая установка ударения ##########
-        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*)$/$1\+$3$4/;
-        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$3$4/;
+#        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*)$/$1\+$3$4/;
+#        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$3$4/;
 
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
 
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
 
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
-        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
+#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
 ######## Автоматическая установка ударения ##########
+#		}
+#	uprint(" -> $word\n");
+
+	my $newword="$clearword\n";
+       	utf8::encode($newword);
+	print NEW $newword;
+
+# перебор всех возможных ударений
+	$n=0;
+	$udar{$n}{$clearword}=$word;
+        my(@wletters)=split('',$word);
+        for ($ni = 0; $ni <= $#wletters; $ni++)
+        {
+		$lett=@wletters[$ni];
+                if ($lett=~/($VOWEL)/) {
+			@wletters[$ni]='+'.$lett;
+			$word="@wletters"; $word=~s/\s//g;
+			$n++;
+			$udar{$n}{$clearword}=$word;
+			#print "accent $n $clearword: $word\n";
+			@wletters[$ni]=$lett;
 		}
+	}
+# перебор всех возможных ударений
+
 ############## Автоударение ####
-
-#		uprint(" -> $word\n");
-
-		my $newword="$clearword $word\n";
-        	utf8::encode($newword);
-		print NEW $newword;
-		$udar{$n}{$clearword}=$word;
-		}
+	}
 
 
 
+	$n=0;
 	while (	$udar{$n}{$clearword} ) {
 
 		$udword=$udar{$n}{$clearword};
 		$trword=trancripts($udword);
 		if ($transcription{$trword} eq $udword and $transcription{$clearword}) {
-			uprint("skip: $clearword $udword $trword\n");
+#			uprint("skip: $clearword $udword $trword\n");
 			$n++; next;
 			} else {
 #		if ($word eq 'в') { uprint("$n $word $udword $trword\n"); }
