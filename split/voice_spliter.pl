@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$voice_model="msu_ru_zero.mllt_cd_cont_2000";
+$voice_model="msu_ru_zero.cd_cont_2000";
 
 use utf8;
 use POSIX;
