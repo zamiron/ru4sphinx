@@ -19,8 +19,9 @@ while (my $inline = <IN>)
 
         $inline=~s/^\s+//;
 	if (!$inline) {next;}
-	if ($inline=~/[а-я][А-Я]/) {print "skip: $inline\n"; next;}
-	if ($inline=~/\d/) {print "skip: $inline\n"; next;}
+	if ($inline=~/[а-я][А-Я]/) {uprint("skip: $inline\n"); next;}
+	if ($inline=~/\d/) {uprint("skip: $inline\n"); next;}
+	if ($inline=~/^\w+$/) {uprint("skip: $inline\n"); next;}
 
 	utf8::encode($inline);
 	print OUT '<s> '.$inline.' </s>'."\n";

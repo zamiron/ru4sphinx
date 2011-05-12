@@ -87,7 +87,7 @@ $outfile=$infile.'.norm';
 open(IN, "<$infile") or die ("need output file name");
 open(OUT, ">$outfile") or die ("need output file name");
 
-$preline='';
+$preline="\n";
 while (my $inline = <IN>)
 {
 
@@ -96,15 +96,35 @@ while (my $inline = <IN>)
         utf8::decode($inline);
 
 # удаляем мусор
-        $inline =~ s/[\r\n\t\_\"\'\,\:]/ /g;
-        $inline =~ s/[єЄґ]//g;
+        $inline =~ s/[\r\n\t\_\"\'\,]/ /g;
+        $inline =~ s/[єЄґ²]//g;
 
-# оставить только буквы, цифры, пробелы и тире
+# заменяем некоторые символы словами
+        $inline =~ s/(\d)(Ч|x)(\d)/$1 на $3/g;	# [фото] 3x4
+        $inline =~ s/(1)(\s+)?\%/$1 процент /g;
+        $inline =~ s/(2|3|4)(\s+)?\%/$1 процента /g;
+        $inline =~ s/\%/ процентов /g;
+
+# (1765-1824)
+	$inline =~ s/\.[\s+]?(\d+)[\s\-]+(\d+)[\s+]?\./. с $1го по $2й ./g;
+#	$inline =~ s/\.[\s+]?(\d+)[\s+]?[\-]+[\s+]?(\d+)[\s+]?\./. с $1го по $2й ./g;
+	$inline =~ s/(\W\d+)[\s\-]+(\d+)(\w+)(\W)/$1$3 тире $2$3$4/g;
+	$inline =~ s/(\W\d+\w*)[\s\-]+(\d+\w*\W)/$1 тире $2/g;
+
+# оставить только буквы, цифры, пробелы и тире - всё остальное заменить точкой
 	$inline =~ s/[^\w\d\-\s]+/./g;
+
+# -------
         $inline =~ s/[\-]+/-/g;
+
+# - . - .
 	$inline =~ s/[\-\.]+(\s+)?[\-\.]+/./g;
 
-# здесь не помешает цикл и проверка на то что анг. буква расположена в конце
+#  - Бобик,  - сказал я громко
+        $inline =~ s/^(\s+)?\-\s]+/. /g;
+        $inline =~ s/\s+\-\s]+/. /g;
+
+# здесь не помешает проверка на то что анг. буква расположена в конце
 while($inline ne $oldline) {
 
 	$oldline = $inline;
@@ -142,6 +162,45 @@ while($inline ne $oldline) {
 
 	$inline = lc($inline);
 
+# а-а-а-алы-ы-ы-ый
+        $inline =~ s/([а]+[-]+)+[а]/а/g;
+        $inline =~ s/([б]+[-]+)+[б]/б/g;
+        $inline =~ s/([в]+[-]+)+[в]/в/g;
+        $inline =~ s/([г]+[-]+)+[г]/г/g;
+        $inline =~ s/([д]+[-]+)+[д]/д/g;
+        $inline =~ s/([е]+[-]+)+[е]/е/g;
+        $inline =~ s/([ё]+[-]+)+[ё]/ё/g;
+        $inline =~ s/([ж]+[-]+)+[ж]/ж/g;
+        $inline =~ s/([з]+[-]+)+[з]/з/g;
+        $inline =~ s/([и]+[-]+)+[и]/и/g;
+        $inline =~ s/([й]+[-]+)+[й]/й/g;
+        $inline =~ s/([к]+[-]+)+[к]/к/g;
+        $inline =~ s/([л]+[-]+)+[л]/л/g;
+        $inline =~ s/([м]+[-]+)+[м]/м/g;
+        $inline =~ s/([н]+[-]+)+[н]/н/g;
+        $inline =~ s/([о]+[-]+)+[о]/о/g;
+        $inline =~ s/([п]+[-]+)+[п]/п/g;
+        $inline =~ s/([р]+[-]+)+[р]/р/g;
+        $inline =~ s/([с]+[-]+)+[с]/с/g;
+        $inline =~ s/([т]+[-]+)+[т]/т/g;
+        $inline =~ s/([у]+[-]+)+[у]/у/g;
+        $inline =~ s/([ф]+[-]+)+[ф]/ф/g;
+        $inline =~ s/([х]+[-]+)+[х]/х/g;
+        $inline =~ s/([ц]+[-]+)+[ц]/ц/g;
+        $inline =~ s/([ч]+[-]+)+[ч]/ч/g;
+        $inline =~ s/([ш]+[-]+)+[ш]/ш/g;
+        $inline =~ s/([щ]+[-]+)+[щ]/щ/g;
+        $inline =~ s/([ъ]+[-]+)+[ъ]/ъ/g;
+        $inline =~ s/([ы]+[-]+)+[ы]/ы/g;
+        $inline =~ s/([ь]+[-]+)+[ь]/ь/g;
+        $inline =~ s/([э]+[-]+)+[э]/э/g;
+        $inline =~ s/([ю]+[-]+)+[ю]/ю/g;
+        $inline =~ s/([я]+[-]+)+[я]/я/g;
+
+#  а-завтра-к-вечеру-будем-уже-в-изумрудном-городе
+	while ( $inline =~ s/(\w+)\-(\w+\w)/$1 $2/g ) { };
+	while ( $inline =~ s/(\w+\w)\-(\w+)/$1 $2/g ) { };
+
 # римские цифры
         $inline =~ s/ i / первая /g;
         $inline =~ s/ ii / вторая /g;
@@ -164,6 +223,7 @@ while($inline ne $oldline) {
         $inline =~ s/ xix / девятнадцатая /g;
         $inline =~ s/ xx / двадцатая /g;
         $inline =~ s/ xxi / двадцать первая /g;
+        $inline =~ s/ xxii / двадцать вторая /g;
 
 # убираем англоязычные буквы
         $inline =~ s/[a-zA-Z]+/ /g;
@@ -172,9 +232,8 @@ while($inline ne $oldline) {
         while ($inline =~ s/ \- / /g) {};
         $inline =~ s/^(\s+)?\-(\s+)?//;
 
-# (1765-1824)
-	$inline =~ s/[\W]ок\./около/;
-	$inline =~ s/\.[\s+]?(\d+)[\s+]?\-[\s+]?(\d+)[\s+]?\./. с $1го по $2й ./g;
+
+
 
 #print "2 $inline\n";
 
@@ -189,24 +248,24 @@ while($inline ne $oldline) {
                 $inline =~ s/$word/$word_norm /g;
                 }
 
+#	if ( $inline =~ / (\w+(\-\w+))+) / ) {
+#		my $word=$1;
+#	}
 
 #print "3 $inline\n";
 
+	$inline =~ s/[\W]ок\./около/;
         $inline =~ s/cу/су/g;
         $inline =~ s/ и т\.д\./ и так далее /g;
         $inline =~ s/ и т\.п\./ и тому подобное /g; 
         $inline =~ s/ т\.е\./ тоесть/g;
         $inline =~ s/ св\./ святого/g;
 
-        $inline =~ s/([\d]+)(Ч|x)([\d]+)/$1 на $3/g;	# [фото] 3x4
         $inline =~ s/ г\./ год/g;
         $inline =~ s/ гг\./ годах/g;
         $inline =~ s/ изд\./ издание/g;
         $inline =~ s/\// дробь /g;
 
-        $inline =~ s/(1)(\s+)?\%/$1 процент /g;
-        $inline =~ s/(2|3|4)(\s+)?\%/$1 процента /g;
-        $inline =~ s/\%/ процентов /g;
 
 #        $inline =~ s/[^\w\d\-\/\%\s]+/ . /g;
 
@@ -256,22 +315,27 @@ while($inline ne $oldline) {
         {
 
 #		print "$ni $outline\n";
+		if (length(@words[$ni])>33) { next; }
 		if (@words[$ni] eq 'ъ' or @words[$ni] eq 'ь') { next; }
 		if (@words[$ni] eq '.') { $outline.="\n"; next; }
 		if ($ni==0 and $preline=~/\-$/) { $outline.=wcheck($ni); } else { $outline.=" ".wcheck($ni); }
         }
 
+	if ($preline=~/\n$/) {
+		$outline=~s/^\s+//;
+		}
 
 	$preline=$outline;
 	$outline=~s/\-$//;
-#        $outline=~s/ - / /g; #?
-#        $outline=~s/^\s+//;
-        $outline=~s/\n\s+/\n/g;
 
-#       $outline=~s/[\n]+/\n/g;
+#	$outline=~s/-/ /g;
+        $outline=~s/\n\s+/\n/g;
+        $outline=~s/\n+/\n/g;
 #	if ($outline=~/[\w]+/) { } else { next; }
 
 	utf8::encode($outline);
+#	print ">$outline<\n";
+
 	print OUT $outline;
 }
 
@@ -608,7 +672,7 @@ sub dict {
                 if ($edict{$word}) { $word=$edict{$word}; $found++; }
 # если в словаре нет слитного слова, но есть слово через тире
                 if ($tdict{$word}) { $word=$tdict{$word}; $found++; }
-                if ($found==0) { uprint("$word not found in dict\n"); }
+#                if ($found==0) { uprint("$word not found in dict\n"); }
                 }
 return $word;
 }
