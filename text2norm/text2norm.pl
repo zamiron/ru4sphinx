@@ -68,10 +68,14 @@ while (my $inline = <DICT>)
         my ($word,$text) = split(/[\s]+/,$inline,2);
         $word=~s/\+//g;
         $dict{$word}++;
-        $eword=$word; $eword=~s/ё/е/g;
-        $edict{$eword}=$word;
-        $tword=$eword; $tword=~s/\-//g;
-        $tdict{$tword}=$word;
+	if ($word=~/ё/) {
+        	$eword=$word; $eword=~s/ё/е/g;
+        	$edict{$eword}=$word;
+		}
+	if ($word=~/\-/) {
+        	$tword=$word; $tword=~s/\-//g;
+        	$tdict{$tword}=$word;
+		}
 }
 
 print "dict loaded\n";
@@ -95,9 +99,15 @@ while (my $inline = <IN>)
 	$inline.=' ';
         utf8::decode($inline);
 
+# л╦гкий
+        $inline =~ s/(\w)╦(\w)/$1ё$1/g;
+
 # удаляем мусор
         $inline =~ s/[\r\n\t\_\"\'\,]/ /g;
-        $inline =~ s/[єЄґ²]//g;
+        $inline =~ s/[єЄґ²╜╗]//g;
+
+# <b>Э</b>to было очень давно.
+        $inline =~ s/\<[a-zA-Z\s\d\/\=\.\"\'\#]+\>//g;
 
 # заменяем некоторые символы словами
         $inline =~ s/(\d)(Ч|x)(\d)/$1 на $3/g;	# [фото] 3x4
@@ -121,14 +131,14 @@ while (my $inline = <IN>)
 	$inline =~ s/[\-\.]+(\s+)?[\-\.]+/./g;
 
 #  - Бобик,  - сказал я громко
-        $inline =~ s/^(\s+)?\-\s]+/. /g;
+        $inline =~ s/^(\s+)?\-\s]+/. /;
         $inline =~ s/\s+\-\s]+/. /g;
 
 # здесь не помешает проверка на то что анг. буква расположена в конце
 while($inline ne $oldline) {
 
 	$oldline = $inline;
-	$inline =~ s/[T]([а-яА-Я])/Т$1/g;
+	$inline =~ s/[Tt]([а-яА-Я])/Т$1/g;
 	$inline =~ s/[Ee]([а-яА-Я])/е$1/g;
 	$inline =~ s/[Oo]([а-яА-Я])/о$1/g;
 	$inline =~ s/[Pp]([а-яА-Я])/р$1/g;
@@ -137,11 +147,11 @@ while($inline ne $oldline) {
 	$inline =~ s/[Kk]([а-яА-Я])/к$1/g;
 	$inline =~ s/[Cc]([а-яА-Я])/с$1/g;
 	$inline =~ s/[B]([а-яА-Я])/в$1/g;
-	$inline =~ s/[M]([а-яА-Я])/м$1/g;
-	$inline =~ s/[y]([а-яА-Я])/у$1/g;
+	$inline =~ s/[Mm]([а-яА-Я])/м$1/g;
+	$inline =~ s/[Yy]([а-яА-Я])/у$1/g;
 	$inline =~ s/[n]([а-яА-Я])/п$1/g;
 
-	$inline =~ s/([а-яА-Я])[T]/$1Т/g;
+	$inline =~ s/([а-яА-Я])[Tt]/$1Т/g;
 	$inline =~ s/([а-яА-Я])[Ee]/$1е/g;
 	$inline =~ s/([а-яА-Я])[Oo]/$1о/g;
 	$inline =~ s/([а-яА-Я])[Pp]/$1р/g;
@@ -150,8 +160,8 @@ while($inline ne $oldline) {
 	$inline =~ s/([а-яА-Я])[Kk]/$1к/g;
 	$inline =~ s/([а-яА-Я])[Cc]/$1с/g;
 	$inline =~ s/([а-яА-Я])[B]/$1в/g;
-	$inline =~ s/([а-яА-Я])[M]/$1м/g;
-	$inline =~ s/([а-яА-Я])[y]/$1у/g;
+	$inline =~ s/([а-яА-Я])[Mm]/$1м/g;
+	$inline =~ s/([а-яА-Я])[Yy]/$1у/g;
 	$inline =~ s/([а-яА-Я])[n]/$1п/g;
 
 	}
@@ -198,8 +208,8 @@ while($inline ne $oldline) {
         $inline =~ s/([я]+[-]+)+[я]/я/g;
 
 #  а-завтра-к-вечеру-будем-уже-в-изумрудном-городе
-	while ( $inline =~ s/(\w+)\-(\w+\w)/$1 $2/g ) { };
-	while ( $inline =~ s/(\w+\w)\-(\w+)/$1 $2/g ) { };
+#	while ( $inline =~ s/(\w+)\-(\w+\w)/$1 $2/g ) { };
+#	while ( $inline =~ s/(\w+\w)\-(\w+)/$1 $2/g ) { };
 
 # римские цифры
         $inline =~ s/ i / первая /g;
@@ -224,6 +234,11 @@ while($inline ne $oldline) {
         $inline =~ s/ xx / двадцатая /g;
         $inline =~ s/ xxi / двадцать первая /g;
         $inline =~ s/ xxii / двадцать вторая /g;
+        $inline =~ s/ xxiii / двадцать третья /g;
+        $inline =~ s/ xxiv / двадцать четвёртая /g;
+        $inline =~ s/ xxv / двадцать пятая /g;
+        $inline =~ s/ xxvi / двадцать шестая /g;
+        $inline =~ s/ xxvii / двадцать седьмая /g;
 
 # убираем англоязычные буквы
         $inline =~ s/[a-zA-Z]+/ /g;
@@ -238,7 +253,7 @@ while($inline ne $oldline) {
 #print "2 $inline\n";
 
 # Н Е    С П Е Ш И Т Е     П О К У П А Т Ь,    Н Е     Ш В Ы Р Я Й Т Е С Ь
-        if ( $inline =~ /^(\w[\s\.]+)((\w[\s\.]+)+)(\w)$/ ) {
+        if ( $inline =~ /^[\s\.]*(\w[\s\.]+)((\w[\s\.]+)+)(\w)[\s\.]*$/ ) {
                 while($inline =~ s/(\w) (\w)/$1$2/g) {};
                 }
         while ( $inline =~ / (\w \w )((\w )+)(\w)?/ ) {
@@ -246,6 +261,12 @@ while($inline ne $oldline) {
                 my $word_norm = $word;
                 $word_norm =~ s/ //g;
                 $inline =~ s/$word/$word_norm /g;
+                }
+        while ( $inline =~ / (\w\-\w\-)((\w\-)+)(\w) / ) {
+                my $word=$1.$2.$4;
+                my $word_norm = $word;
+                $word_norm =~ s/-//g;
+                $inline =~ s/$word/$word_norm/g;
                 }
 
 #	if ( $inline =~ / (\w+(\-\w+))+) / ) {
@@ -316,7 +337,7 @@ while($inline ne $oldline) {
 
 #		print "$ni $outline\n";
 		if (length(@words[$ni])>33) { next; }
-		if (@words[$ni] eq 'ъ' or @words[$ni] eq 'ь') { next; }
+		if (@words[$ni] =~ /^ъ/ or @words[$ni] =~ /^ь/) { next; }
 		if (@words[$ni] eq '.') { $outline.="\n"; next; }
 		if ($ni==0 and $preline=~/\-$/) { $outline.=wcheck($ni); } else { $outline.=" ".wcheck($ni); }
         }
@@ -672,10 +693,39 @@ sub dict {
                 if ($edict{$word}) { $word=$edict{$word}; $found++; }
 # если в словаре нет слитного слова, но есть слово через тире
                 if ($tdict{$word}) { $word=$tdict{$word}; $found++; }
-#                if ($found==0) { uprint("$word not found in dict\n"); }
+                if ($found==0) {
+			if ($word=~/\-/) {
+
+				#  а-завтра-к-вечеру-будем-уже-в-изумрудном-городе
+				if (length($word)>33) {
+        				while ( $word =~ s/(\w+)\-(\w+\w)/$1 $2/g ) { };
+				        while ( $word =~ s/(\w+\w)\-(\w+)/$1 $2/g ) { };
+					}
+
+				# з-в-е-з-д-а, м-а-р-с
+				$ckword=$word; $ckword=~s/\-//g;
+				if ($dict{$ckword}) { $word=$ckword; $found++; }
+
+				# существуют слова по отдельности?
+#				if ($word=~/\-/) {
+#					my($word1, $word2) = split('-', $word, 2);
+#					if ( ($dict{$word1} or $dict{$word2}) and length($word2)>3 ) {
+#						$word=$word1.' '.$word2;
+#						$found++;
+#						}
+#					}
+				} else {
+					# добавляем неизвестное слово без '-' в словарь
+					$dict{$word}++;
+					}
+			# uprint("$word not found in dict\n");
+			}
                 }
 return $word;
 }
+
+
+
 
 
 
