@@ -6,11 +6,14 @@ use POSIX;
 my $textfile;
 my $outfilename;
 
-if ( $ARGV[0] ) { $textfile=$ARGV[0]; } else { exit; }
-if ( $ARGV[1] ) { $outfilename=$ARGV[1]; } else { exit; }
+$textfile=$ARGV[0];
+$outfilename=$ARGV[1];
+if (!$textfile or !$outfilename) {
+	print "USAGE: dict2transcript.pl <input textfile> <output dictory>\n";
+	exit;
+	}
 
-print "input text: $textfile\n
-output dict: $outfilename\n";
+print "Read: $textfile. Save: $outfilename.\n";
 
 #my $textfile="/home/SphinxTrain/etc/msu_ru_zero_src.transcription";
 #my $outfilename = '/home/SphinxTrain/etc/msu_ru_zero.dic';
@@ -32,36 +35,58 @@ my $testword;
 
 
 # глухие
-$SURD = 'p|pp|f|ff|k|kk|t|tt|sh|s|ss|h|hh|c|ch|sch';
+my $SURD = 'p|pp|f|ff|k|kk|t|tt|sh|s|ss|h|hh|c|ch|sch';
 # гласные
-$VOWEL = 'а|я|о|ё|у|ю|э|е|ы|и|aa|a|oo|o|uu|u|ee|e|yy|y|ii|i|uj|ay|jo|je|ja|ju';
+my $VOWEL = 'а|я|о|ё|у|ю|э|е|ы|и|aa|a|oo|o|uu|u|ee|e|yy|y|ii|i|uj|ay|jo|je|ja|ju';
 # все гласные
-$STARTSYL = "ь|ъ|$VOWEL";
+my $STARTSYL = "ь|ъ|$VOWEL";
 # смягчаюшие гласные
-$SOFTLETTERS = 'ь|я|ё|ю|е|и';
+my $SOFTLETTERS = 'ь|я|ё|ю|е|и';
 # несмягчающие гласные
-$HARDLETTERS = 'ъ|а|о|у|э|ы';
+my $HARDLETTERS = 'ъ|а|о|у|э|ы';
 # $NOPAIR_SOFT = '[ч|щ|й]';
 # $NOPAIR_HARD = '[ж|ш|ц]';
-$NOPAIR = 'ч|щ|й|ж|ш|ц|ch|sch|j|zh|sh|c';
+my $NOPAIR = 'ч|щ|й|ж|ш|ц|ch|sch|j|zh|sh|c';
 # твёрдые согласные, кроме ж,ш,ц
-$HARD_SONAR1 = 'b|v|g|d|z|k|l|m|n|p|r|s|t|f|h';
+my $HARD_SONAR1 = 'b|v|g|d|z|k|l|m|n|p|r|s|t|f|h';
 # твёрдые согласные ж,ш,ц
-$HARD_SONAR2 = 'zh|sh|c';
+my $HARD_SONAR2 = 'zh|sh|c';
 #
-$HARD_SONAR="$HARD_SONAR1|$HARD_SONAR2";
+my $HARD_SONAR="$HARD_SONAR1|$HARD_SONAR2";
 # мягкие согласные
-$SOFT_SONAR = 'bb|vv|gg|dd|zz|j|kk|ll|mm|nn|pp|rr|ss|tt|ff|hh|ch|sch';
-$SOFT_SONAR_SILVER = 'bb|gg|dd|zz|kk|ll|mm|nn|rr|ss|tt|ch|sch';
+my $SOFT_SONAR = 'bb|vv|gg|dd|zz|j|kk|ll|mm|nn|pp|rr|ss|tt|ff|hh|ch|sch';
+my $SOFT_SONAR_SILVER = 'bb|gg|dd|zz|kk|ll|mm|nn|rr|ss|tt|ch|sch';
 # все согласные
-$ALL_SONAR="$HARD_SONAR|$SOFT_SONAR|ь|ъ";
+my $ALL_SONAR="$HARD_SONAR|$SOFT_SONAR|ь|ъ";
 # звонкие, кроме v,vv,j,l,ll,m,mm,n,nn,r,rr
-$RINGING1 = 'b|bb|g|gg|d|dd|zh|z|zz';
+my $RINGING1 = 'b|bb|g|gg|d|dd|zh|z|zz';
 # парные твёрдые согласные
-$PAIR_HARD = 'б|в|г|д|ж|з|b|v|g|d|zh|z';
-$PAIR_HARD1 = "$PAIR_HARD|ц|c";
+my $PAIR_HARD = 'б|в|г|д|ж|з|b|v|g|d|zh|z';
+my $PAIR_HARD1 = "$PAIR_HARD|ц|c";
 #
-$SOGL='б|в|г|д|з|к|л|м|н|й|п|р|с|т|ф|х|ж|ш|щ|ц|ч|ь|ъ|-|\'';
+my $SOGL='б|в|г|д|з|к|л|м|н|й|п|р|с|т|ф|х|ж|ш|щ|ц|ч|ь|ъ|-|\'';
+
+
+## Загружаем базу ударений ##
+$udfdict="$Bin/accent.base";
+open(DICT,"<$udfdict") or die ("File $udfdict dot found\n");
+print "Loading $udfdict :";
+while (my $inline = <DICT>)
+{
+chomp $inline;
+utf8::decode($inline);
+
+if ($inline=~/(\w+)\|(\w+) (\d+)/) {
+        $slg_pre_s=$1;
+        $slg_s=$2;
+        $slg_p=$3;
+        $uddict{$slg_s}{$slg_pre_s}=$slg_p;
+        }
+}
+
+print "... ok\n";
+close(DICT);
+############################
 
 #####################################################
 @dicfile[0]='yo_word.txt';
@@ -224,140 +249,32 @@ for my $word ( sort keys %dict)
 
 	if (!$udar{0}{$word}) { # если нет в словаре
 ############## Автоударение ####
-#	uprint("неизвестное слово: $word");
-#	$word =~ s/ё/+ё/g;
-#	$word =~ s/ьо/ь+о/g;
-#	$word =~ s/йо/й+о/g;
-#	$word =~ s/чо/ч+о/g;
-#	$word =~ s/що/щ+о/g;
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/нида/н+ида/;		# леонида
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/ирую/+ирую/;		# культивирующаяся
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/напя/нап+я/;		# напяливаете
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/знава/знав\+а/;	# опознаваемых
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/знача/знач\+а/;	# предназначавшаяся
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/ига/иг\+а/;		# отодвигаемого
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/([\w])мина([\w])/$1мин+а$2/;		# воспоминание
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/([\w])лав/$1л+ав/;	# Ярослав
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/([\w])янов/$1+янов/;	# Ульянов
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/([\w])([\w])нович/$1+$2нович/;	# флорентинович
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/какого/как\+ого/;
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/нибудь/ниб\+удь/;
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/сматр/см+атр/;
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/еча/еч\+а/;
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^кое\-/к+ое-/;
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^как([w+])\-/как+$1\-/;
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^чьего\-/чьег+о\-/;
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^чьему\-/чьем+у\-/;
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^чь([\w]+)\-/чь+$1\-/;
-#	}
-#        if ($word=~/\+/) { } else
-#        {
-#		$word =~ s/^это([\w]+)\-/+это$1\-/;
-#	}
-#
-#        if ($word=~/\+/) { } else
-#        	{
+	$n=0;
 
-######## Автоматическая установка ударения ##########
-#        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*)$/$1\+$3$4/;
-#        $word =~ s/^(($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$3$4/;
+	$word=udar($clearword);
+	$udar{$n}{$clearword}=$word;
 
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$5$6/;
-
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$7$8/;
-
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
-#        $word =~ s/^(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)($VOWEL)(($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*($VOWEL)($SOGL)*)$/$1\+$9$10/;
-######## Автоматическая установка ударения ##########
-#		}
-#	uprint(" -> $word\n");
-
-	my $newword="$clearword\n";
+	my $newword="$clearword $word\n";
        	utf8::encode($newword);
 	print NEW $newword;
+#	uprint("неизвестное слово: $word");
+
 
 # перебор всех возможных ударений
-	$n=0;
-	$udar{$n}{$clearword}=$word;
-        my(@wletters)=split('',$word);
-        for ($ni = 0; $ni <= $#wletters; $ni++)
-        {
-		$lett=@wletters[$ni];
-                if ($lett=~/($VOWEL)/) {
-			@wletters[$ni]='+'.$lett;
-			$word="@wletters"; $word=~s/\s//g;
-			$n++;
-			$udar{$n}{$clearword}=$word;
-			#print "accent $n $clearword: $word\n";
-			@wletters[$ni]=$lett;
-		}
-	}
+#	$udar{$n}{$clearword}=$word;
+#        my(@wletters)=split('',$word);
+#        for ($ni = 0; $ni <= $#wletters; $ni++)
+#        {
+#		$lett=@wletters[$ni];
+#                if ($lett=~/($VOWEL)/) {
+#			@wletters[$ni]='+'.$lett;
+#			$word="@wletters"; $word=~s/\s//g;
+#			$n++;
+#			$udar{$n}{$clearword}=$word;
+#			#print "accent $n $clearword: $word\n";
+#			@wletters[$ni]=$lett;
+#		}
+#	}
 # перебор всех возможных ударений
 
 ############## Автоударение ####
@@ -848,5 +765,30 @@ sub uprint {
         my ($vtxt)=@_;
         utf8::encode($vtxt);
         print $vtxt;
+}
+######################
+sub udar {
+	my ($warg)=@_;
+	my $slg_s;
+        if ($warg=~/ё/) {
+		$warg=~s/ё/+ё/g;
+		return $warg;
+		}
+        while ( $warg=~s/(($SOGL)*($VOWEL)($SOGL))(($SOGL)+($VOWEL))/$1 $5/ ) { }
+        while ( $warg=~s/(($SOGL)*($VOWEL))(($SOGL)+($VOWEL))/$1 $4/ ) { }
+        while ( $warg=~s/(($SOGL)*($VOWEL))(($VOWEL))/$1 $4/ ) { }
+        my $n=0; my $pri=0; my $nwrd=''; my $pre_slog="N";
+        while ( ($slg_s,$warg)=split(' ',$warg,2) ) {
+                $n++;
+                $slg_p=$uddict{$slg_s}{$pre_slog};
+                $pre_slog=$slg_s;
+                if ($slg_p>$pri) {
+                        $pri=$slg_p;
+                        $nwrd=~s/\+//;
+                        $slg_s=~s/($VOWEL)/+$1/;
+                        }
+                $nwrd.=$slg_s;
+                }
+        return $nwrd;
 }
 ######################
