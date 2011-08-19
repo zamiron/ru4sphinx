@@ -2,6 +2,13 @@
 
 use FindBin qw($Bin);
 use POSIX;
+use utf8;
+
+
+my $use_dictionary=1;		# использовать словарь ударений
+my $use_auto_accent=1;		# автопростановка ударений в незнакомых словах - точнось ~80%
+my $use_all_accent=0;		# перебирать все возможности установки ударения (для выравнимания и обучения)
+my $use_all_transcription=0;	# предусмотреть возможность оглушения/озвончивания первой буквы в слове (для выравнимания и обучения?)
 
 my $textfile;
 my $outfilename;
@@ -9,23 +16,13 @@ my $outfilename;
 $textfile=$ARGV[0];
 $outfilename=$ARGV[1];
 if (!$textfile or !$outfilename) {
-	print "USAGE: dict2transcript.pl <input textfile> <output dictory>\n";
+	print "USAGE: dict2transcript.pl <input text file> <output dictionary file>\n";
 	exit;
 	}
 
 print "Read: $textfile. Save: $outfilename.\n";
 
-#my $textfile="/home/SphinxTrain/etc/msu_ru_zero_src.transcription";
-#my $outfilename = '/home/SphinxTrain/etc/msu_ru_zero.dic';
 
-#my $textfile     = '/daemon/utils/sphinx/split/1_1_04.text';
-#my $outfilename  = '/daemon/utils/sphinx/split/1_1_04.dic';
-
-#my $textfile     = 'text.txt';
-#my $outfilename  = 'msu_ru_nsh.dic';
-
-use POSIX;
-use utf8;
 
 my %udar;
 my %transcription;
@@ -99,9 +96,15 @@ close(DICT);
 @dicfile[6]='small_word.txt';
 @dicfile[7]='not_word.txt';
 
+@dicfile[8]='affix.txt';
+@dicfile[9]='tire_word.txt';
+
 foreach (@dicfile)
 {
 my $infilename  = $_;
+
+if (!$use_dictionary) { print "skip $infilename\n"; next; }
+
 open(IN,  "<$Bin/$infilename")  or die ("file $infilename not found");
 
 while (my $inline = <IN>)
@@ -109,10 +112,14 @@ while (my $inline = <IN>)
         chomp $inline;
         utf8::decode($inline);
         my ($clword,$udword) = split(' ',$inline);
-	if ($infilename eq 'yo_word.txt') {
+#	if ($infilename eq 'yo_word.txt') {
+	if (!$udword) {
 		$udword=$clword;
-		$udword=~s/ё/\+ё/;
+#		$udword=~s/ё/+ё/g;
 		}
+	$udword=~s/ё/+ё/g;
+	$udword=~s/\+\+/+/g;
+
 #	$clword=~s/ё/е/g; #!
 #	$eword=$clword; $eword=~s/ё/е/g;
 	$n=0;
@@ -139,7 +146,7 @@ while (my $inline = <IN>)
 	}
 #### Если слово содёржит Ё добавить его в трнаскрипцию как слово с буквой Е
 
-if (1==2) { # пока отключено
+if ($use_all_transcription) {
 #### Иногда гласные в конце не оглушаются и глугие озвончиваются
 	if ($clword=~/[бп]$/) {
 		$udword=~s/^(.+)[бп]$/$1Б/;
@@ -247,39 +254,45 @@ for my $word ( sort keys %dict)
         {
 	$clearword=$word;
 
-	if (!$udar{0}{$word}) { # если нет в словаре
-############## Автоударение ####
+# если нет в словаре
+	if (!$udar{0}{$word}) {
+
 	$n=0;
 
+############## Автоударение ####
+if ($use_auto_accent) {
 	$word=udar($clearword);
 	$udar{$n}{$clearword}=$word;
+	}
+############## Автоударение ####
 
+#
 	my $newword="$clearword $word\n";
        	utf8::encode($newword);
 	print NEW $newword;
 #	uprint("неизвестное слово: $word");
 
-
 # перебор всех возможных ударений
-#	$udar{$n}{$clearword}=$word;
-#        my(@wletters)=split('',$word);
-#        for ($ni = 0; $ni <= $#wletters; $ni++)
-#        {
-#		$lett=@wletters[$ni];
-#                if ($lett=~/($VOWEL)/) {
-#			@wletters[$ni]='+'.$lett;
-#			$word="@wletters"; $word=~s/\s//g;
-#			$n++;
-#			$udar{$n}{$clearword}=$word;
-#			#print "accent $n $clearword: $word\n";
-#			@wletters[$ni]=$lett;
-#		}
-#	}
-# перебор всех возможных ударений
-
-############## Автоударение ####
+if ($use_all_accent) {
+	$udar{$n}{$clearword}=$word;
+        my(@wletters)=split('',$word);
+        for ($ni = 0; $ni <= $#wletters; $ni++)
+        {
+		$lett=@wletters[$ni];
+                if ($lett=~/($VOWEL)/) {
+			@wletters[$ni]='+'.$lett;
+			$word="@wletters"; $word=~s/\s//g;
+			$n++;
+			$udar{$n}{$clearword}=$word;
+			#print "accent $n $clearword: $word\n";
+			@wletters[$ni]=$lett;
+		}
 	}
+}
+# перебор всех возможных ударений
 
+}
+# если нет в словаре
 
 
 	$n=0;
@@ -379,13 +392,13 @@ $testword=~s/([+]?е) г ([+]?о с [+]?я )$/$1 v $2/g;		# *егося
 
 # заимствованные слова произносящиеся через "Э" (надо будет создать словарь)
 $testword=~s/(с [+]?и н) т ([+]?е з)/$1 t $2/g;
-$testword=~s/([+]?и н) т ([+]?е р (в|ф|п))/$1 t $1/g;
+$testword=~s/([+]?и н) т ([+]?е р (в|ф|п))/$1 t $2/g;
 $testword=~s/([+]?э с) т ([+]?е т)/$1 t $2/g;
 $testword=~s/([+]?а) н ([+]?е л [+]?я)/$1 n $2/g;
 $testword=~s/^ (с [+]?о) н ([+]?е т)/ $1 n $2/g;
-#$testword=~s/(т [+]?у н) н ([+]?е л)/$1 n $2/g;
+$testword=~s/(т [+]?у н) н ([+]?е л)/$1 n $2/g;
 $testword=~s/^ б ([+]?е к [+]?и н г)/ b $1/g;
-$testword=~s/^ б ([+]?е й к [+]?е р)/ b $2/g;
+$testword=~s/^ б ([+]?е й к [+]?е р)/ b $1/g;
 $testword=~s/^ (м [+]?о) д ([+]?е с т)/ $1 d $2/g;
 $testword=~s/^ ([+]?э к) з ([+]?е м)/ $1 z $2/g;
 $testword=~s/^ ([+]?э) н ([+]?е й)/ $1 n $2/g;

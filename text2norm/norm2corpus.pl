@@ -22,6 +22,9 @@ while (my $inline = <IN>)
 	if ($inline=~/[а-я][А-Я]/) {uprint("skip: $inline\n"); next;}
 	if ($inline=~/\d/) {uprint("skip: $inline\n"); next;}
 	if ($inline=~/^\w+$/) {uprint("skip: $inline\n"); next;}
+	if ($inline=~/ а а /) {uprint("skip: $inline\n"); next;}
+	if ($inline=~/ \w \w \w /) {uprint("skip: $inline\n"); next;}
+
 #	if ( length($inline)<50 ) {uprint("skip: $inline\n"); next;}
 
 	utf8::encode($inline);
