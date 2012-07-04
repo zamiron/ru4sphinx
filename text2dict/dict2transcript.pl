@@ -12,15 +12,22 @@ my $use_all_transcription=0;	# предусмотреть возможность
 
 my $textfile;
 my $outfilename;
+my $continuous=0;
 
-$textfile=$ARGV[0];
-$outfilename=$ARGV[1];
-if (!$textfile or !$outfilename) {
-	print "USAGE: dict2transcript.pl <input text file> <output dictionary file>\n";
-	exit;
+if ($#ARGV > 0) {
+	$textfile=$ARGV[0];
+	$outfilename=$ARGV[1];
+	if (!$textfile or !$outfilename) {
+		print "USAGE: dict2transcript.pl <input text file> <output dictionary file>\n";
+		exit;
 	}
+} else {
+	$textfile = "-";
+	$outfilename = "-";
+	$continuous = 1;
+}
 
-print "Read: $textfile. Save: $outfilename.\n";
+print STDERR "Read: $textfile. Save: $outfilename.\n";
 
 
 
@@ -67,7 +74,7 @@ my $SOGL='б|в|г|д|з|к|л|м|н|й|п|р|с|т|ф|х|ж|ш|щ|ц|ч|ь|ъ|-
 ## Загружаем базу ударений ##
 $udfdict="$Bin/accent.base";
 open(DICT,"<$udfdict") or die ("File $udfdict dot found\n");
-print "Loading $udfdict :";
+print STDERR "Loading $udfdict :";
 while (my $inline = <DICT>)
 {
 chomp $inline;
@@ -81,7 +88,7 @@ if ($inline=~/(\w+)\|(\w+) (\d+)/) {
         }
 }
 
-print "... ok\n";
+print STDERR "... ok\n";
 close(DICT);
 ############################
 
@@ -103,7 +110,7 @@ foreach (@dicfile)
 {
 my $infilename  = $_;
 
-if (!$use_dictionary) { print "skip $infilename\n"; next; }
+if (!$use_dictionary) { print STDERR "skip $infilename\n"; next; }
 
 open(IN,  "<$Bin/$infilename")  or die ("file $infilename not found");
 
@@ -216,42 +223,63 @@ if ($use_all_transcription) {
 }
 
 close(IN);
-print "Dictionary $infilename loaded\n";
+print STDERR "Dictionary $infilename loaded\n";
 }
 #####################################################
 my %dict;
 
 open(IN, "<$textfile") or die ("file $textfile not found");
-while (my $inline = <IN>)
-{
-        chomp $inline;
-        utf8::decode($inline);
-#	$inline =~ s/\([\w\d\.\_\-]+\)//g;
-	$inline =~ s/\(.+\)$//;
-	$inline =~ s/\<s\>//g;
-	$inline =~ s/\<\/s\>//g;
-
-#	$inline=~s/ё/е/g; #!
-	$inline=~s/\+//g;
-
-        @words=split(/[^\w\-\']+/,$inline);
-        for ($ni = 0; $ni <= $#words; $ni++)
-        {
-                $word=@words[$ni];
-                if ($word and !$dict{$word}) {
-                        $dict{$word}++;
-                        }
-        }
-
-}
-close(IN);
-#####################################################
-open(NEW,  ">$Bin/new_word.txt")  or die ("can't save new_word.txt");
-
-open(ACCENT, ">$outfilename.accent")   or die ("can't save $outfilename.accent");
 open(WORDS, ">$outfilename")   or die ("can't save $outfilename");
-for my $word ( sort keys %dict)
-        {
+
+if (!$continuous) {
+	while (my $inline = <IN>)
+	{
+	        chomp $inline;
+	        utf8::decode($inline);
+#		$inline =~ s/\([\w\d\.\_\-]+\)//g;
+		$inline =~ s/\(.+\)$//;
+		$inline =~ s/\<s\>//g;
+		$inline =~ s/\<\/s\>//g;
+
+#		$inline=~s/ё/е/g; #!
+		$inline=~s/\+//g;
+
+	        @words=split(/[^\w\-\']+/,$inline);
+	        for ($ni = 0; $ni <= $#words; $ni++)
+	        {
+	                $word=@words[$ni];
+	                if ($word and !$dict{$word}) {
+	                        $dict{$word}++;
+	                        }
+	        }
+
+	}
+
+	open(NEW,  ">$Bin/new_word.txt")  or die ("can't save new_word.txt");
+
+	open(ACCENT, ">$outfilename.accent")   or die ("can't save $outfilename.accent");
+
+	for my $word ( sort keys %dict) {
+		process($word);
+	}
+} else {
+	while (my $inline = <IN>)
+	{
+		chomp $inline;
+	        utf8::decode($inline);
+		process($inline);
+	}
+}
+
+
+close(IN);
+close(WORDS);
+close(ACCENT);
+close(NEW);
+
+##########################################################
+sub process {
+	my ($word)=@_;
 	$clearword=$word;
 
 # если нет в словаре
@@ -268,7 +296,9 @@ if ($use_auto_accent) {
 #
 	my $newword="$clearword $word\n";
        	utf8::encode($newword);
-	print NEW $newword;
+	if (!$continuous) {
+		print NEW $newword;
+	}
 #	uprint("неизвестное слово: $word");
 
 # перебор всех возможных ударений
@@ -318,19 +348,15 @@ if ($use_all_accent) {
 			}
 		utf8::encode($str);
 		print WORDS "$str\n";
-		utf8::encode($str2);
-		print ACCENT "$str2\n";
+		if (!$continuous) {
+			utf8::encode($str2);
+			print ACCENT "$str2\n";
+		}
 				}
 
 		$n++;
 		}
-	}
-
-
-close(WORDS);
-close(ACCENT);
-close(NEW);
-
+} 
 ##########################################################
 sub trancripts {
 	my ($word)=@_;
