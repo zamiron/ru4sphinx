@@ -262,7 +262,6 @@ for my $word ( sort keys %dict)
 ############## Автоударение ####
 if ($use_auto_accent) {
 	$word=udar($clearword);
-	$udar{$n}{$clearword}=$word;
 	}
 ############## Автоударение ####
 
@@ -782,9 +781,41 @@ sub uprint {
 ######################
 sub udar {
 	my ($warg)=@_;
+	my ($word)=@_;
 	my $slg_s;
+# мультислово
+        if ($warg=~/-/) {
+	        my ($first, $rest) = split(/\-/,$warg, 2);
+
+		if (!$udar{0}{$first}) {
+			if ($use_auto_accent) {
+				$word=udar($first);
+			}
+		}
+		if (!$udar{0}{$rest}) {
+			if ($use_auto_accent) {
+				$word=udar($rest);
+			}
+		}
+		my($n)=0;
+		my($i)=0;
+		my($j)=0;
+		while (	$udar{$i}{$first} ) {
+			$j = 0;
+			while (	$udar{$j}{$rest} ) {
+				my($udword) = $udar{$i}{$first} . "-" . $udar{$j}{$rest};
+				$udar{$n}{$warg}=$udword;
+				$n++;
+				$j++;
+			}
+			$i++;
+		}
+		return $warg;
+        }
+# мультислово
         if ($warg=~/ё/) {
 		$warg=~s/ё/+ё/g;
+		$udar{0}{$word}=$warg;
 		return $warg;
 		}
         while ( $warg=~s/(($SOGL)*($VOWEL)($SOGL))(($SOGL)+($VOWEL))/$1 $5/ ) { }
@@ -802,6 +833,7 @@ sub udar {
                         }
                 $nwrd.=$slg_s;
                 }
+        $udar{0}{$word}=$nwrd;
         return $nwrd;
 }
 ######################
